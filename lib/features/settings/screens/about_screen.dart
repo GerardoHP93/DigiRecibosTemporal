@@ -6,6 +6,7 @@ import 'package:digirecibos/core/constants/app_dimens.dart';
 import 'package:digirecibos/core/constants/app_text_styles.dart';
 import 'package:digirecibos/features/settings/screens/privacy_policy_screen.dart';
 import 'package:digirecibos/features/settings/screens/help_screen.dart';
+import 'package:digirecibos/features/settings/screens/terms_conditions_screen.dart';
 import 'package:digirecibos/shared/widgets/decorative_background.dart';
 
 class AboutScreen extends StatelessWidget {
@@ -35,6 +36,13 @@ class AboutScreen extends StatelessWidget {
                 icon: Icons.privacy_tip_outlined,
                 label: 'Políticas de privacidad',
                 onTap: () => _navigateToPrivacyPolicy(context),
+              ),
+              const SizedBox(height: AppDimens.paddingL),
+              _buildNavigationButton(
+                context: context,
+                icon: Icons.gavel_outlined,
+                label: 'Términos y condiciones',
+                onTap: () => _navigateToTermsConditions(context),
               ),
               const SizedBox(height: AppDimens.paddingL),
               _buildNavigationButton(
@@ -176,6 +184,13 @@ class AboutScreen extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const HelpScreen()),
+    );
+  }
+
+  void _navigateToTermsConditions(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const TermsConditionsScreen()),
     );
   }
 }

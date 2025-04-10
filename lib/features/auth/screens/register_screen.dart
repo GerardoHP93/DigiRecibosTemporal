@@ -19,9 +19,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
   final AuthService authService = AuthService();
   bool _isLoading = false;
+  bool _termsAccepted = false; // Nueva variable para términos y condiciones
 
   // Validación de formulario
   String? _validateUsername(String? value) {
@@ -75,7 +77,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final usernameError = _validateUsername(usernameController.text);
     final emailError = _validateEmail(emailController.text);
     final passwordError = _validatePassword(passwordController.text);
-    final confirmPasswordError = _validateConfirmPassword(confirmPasswordController.text);
+    final confirmPasswordError =
+        _validateConfirmPassword(confirmPasswordController.text);
 
     if (usernameError != null ||
         emailError != null ||
@@ -96,6 +99,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
       isValid = false;
     }
+
+    // Verificar si se aceptaron los términos y condiciones
+    if (!_termsAccepted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content:
+              Text('Debes aceptar los términos y condiciones para continuar'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      isValid = false;
+    }
+
     return isValid;
   }
 
@@ -139,14 +155,57 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
+  // Mostrar diálogo de términos y condiciones
+  void _showTermsAndConditions() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Términos y Condiciones'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              Text(
+                'TÉRMINOS Y CONDICIONES DE USO',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10),
+              Text(
+                'Al utilizar la aplicación DigiRecibos, usted acepta los siguientes términos y condiciones:',
+              ),
+              SizedBox(height: 10),
+              Text(
+                '1. La aplicación permite almacenar y organizar recibos digitales.\n'
+                '2. Sus datos personales serán tratados de acuerdo a nuestra política de privacidad.\n'
+                '3. Usted es responsable de mantener la seguridad de su cuenta.\n'
+                '4. No nos hacemos responsables por la pérdida de datos.\n'
+                '5. Nos reservamos el derecho de modificar o discontinuar el servicio en cualquier momento.\n'
+                '6. El uso indebido de la aplicación puede resultar en la suspensión de su cuenta.\n'
+                '7. Los archivos subidos deben respetar las leyes de propiedad intelectual.\n'
+                '8. La aplicación se proporciona "tal cual" sin garantías de ningún tipo.',
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cerrar'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AuthBackground(
       backgroundColor: AppColors.primaryLight,
       child: SafeArea(
         child: AuthCard(
-          minHeight: 550,
-          maxHeight: 680,
+          minHeight: 600, // Ajustado para hacer espacio para los términos
+          maxHeight: 720, // Ajustado para hacer espacio para los términos
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -154,7 +213,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               // Título
               const AuthTitle(title: "CREAR UNA CUENTA"),
               const SizedBox(height: AppDimens.paddingXL),
-              
+
               // Campo de correo
               AuthTextField(
                 controller: emailController,
@@ -162,14 +221,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: AppDimens.paddingL),
-              
+
               // Campo de nombre de usuario
               AuthTextField(
                 controller: usernameController,
                 labelText: "Ingresa tu nombre",
               ),
               const SizedBox(height: AppDimens.paddingL),
-              
+
               // Campo de contraseña
               PasswordField(
                 controller: passwordController,
@@ -177,22 +236,52 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 helperText: "Mínimo 8 caracteres, con mayúsculas y números",
               ),
               const SizedBox(height: AppDimens.paddingL),
-              
+
               // Campo de confirmar contraseña
               PasswordField(
                 controller: confirmPasswordController,
                 labelText: "Confirma tu contraseña",
               ),
-              const SizedBox(height: AppDimens.paddingXL),
-              
+              const SizedBox(height: AppDimens.paddingL),
+
+              // Términos y condiciones
+              Row(
+                children: [
+                  Checkbox(
+                    value: _termsAccepted,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        _termsAccepted = value ?? false;
+                      });
+                    },
+                    activeColor: AppColors.primary,
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: _showTermsAndConditions,
+                      child: Text(
+                        'Acepto los términos y condiciones',
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppDimens.paddingL),
+
               // Botón de crear cuenta
               AuthButton(
                 text: "Crear cuenta",
                 isLoading: _isLoading,
-                onPressed: register,
+                onPressed: _termsAccepted
+                    ? register
+                    : null, // Se desactiva si no se aceptan los términos
               ),
               const SizedBox(height: AppDimens.paddingL),
-              
+
               // Botón de ya tengo una cuenta
               AuthButton(
                 text: "Ya tengo una cuenta",
