@@ -1,0 +1,2 @@
+C:/Users/thecr/Documents/Prueba_Interfaz/DigiRecibos/android/app/.cxx/Debug/2x5p1t1k/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/thecr/Documents/Prueba_Interfaz/DigiRecibos/android/app/.cxx/Debug/2x5p1t1k/armeabi-v7a/CMakeFiles/rebuild_cache.dir

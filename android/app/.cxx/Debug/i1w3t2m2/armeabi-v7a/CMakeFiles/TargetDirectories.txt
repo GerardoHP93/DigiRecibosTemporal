@@ -1,0 +1,2 @@
+C:/Users/thecr/Documents/VersionNew/DigiRecibos/android/app/.cxx/Debug/i1w3t2m2/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/thecr/Documents/VersionNew/DigiRecibos/android/app/.cxx/Debug/i1w3t2m2/armeabi-v7a/CMakeFiles/rebuild_cache.dir

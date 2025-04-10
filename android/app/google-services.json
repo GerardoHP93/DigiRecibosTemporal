@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "409929067819",
+    "project_id": "digirecibos-ddd47",
+    "storage_bucket": "digirecibos-ddd47.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:409929067819:android:02f652f14553c71052296e",
+        "android_client_info": {
+          "package_name": "com.example.digirecibos"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6KYldcDXYVwa7qDP56mk7DXvJIxGunf0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
