@@ -1,5 +1,4 @@
 // lib/features/categories/screens/category_files_screen.dart
-
 import 'package:digirecibos/features/categories/widgets/filter_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -30,7 +29,7 @@ class CategoryFilesScreen extends StatefulWidget {
   final String category;
   final Color categoryColor;
   final IconData categoryIcon;
-
+  
   const CategoryFilesScreen({
     Key? key,
     required this.category,
@@ -45,7 +44,7 @@ class CategoryFilesScreen extends StatefulWidget {
 class _CategoryFilesScreenState extends State<CategoryFilesScreen> {
   final CategoryManager _categoryManager = CategoryManager();
   final ReceiptRepository _receiptRepository = ReceiptRepository();
-  
+ 
   List<Receipt> _receipts = [];
   List<Receipt>? _allReceipts; // Lista de todos los recibos sin filtrar
   String? _categoryId;
@@ -98,7 +97,7 @@ class _CategoryFilesScreenState extends State<CategoryFilesScreen> {
     try {
       // Cargar categorías
       final categories = await _categoryManager.loadCategories();
-
+      
       // Buscar categoría por nombre
       final categoryMatch = categories.firstWhere(
         (category) => category['name'] == widget.category,
@@ -108,7 +107,6 @@ class _CategoryFilesScreenState extends State<CategoryFilesScreen> {
       if (categoryMatch.isNotEmpty) {
         // Obtener el ID de la categoría
         _categoryId = categoryMatch['id'] as String;
-
         // Iniciar escucha de recibos
         _startListeningReceipts();
       } else {
@@ -131,14 +129,14 @@ class _CategoryFilesScreenState extends State<CategoryFilesScreen> {
   // Iniciar escucha de cambios en los recibos
   void _startListeningReceipts() {
     if (_categoryId == null) return;
-
+    
     try {
       // Cancelar cualquier suscripción anterior para evitar duplicados
       _receiptsSubscription?.cancel();
-
+      
       // Obtener el stream de recibos
       final stream = _receiptRepository.getReceiptsByCategory(_categoryId!);
-
+      
       // Suscribirse a los cambios
       _receiptsSubscription = stream.listen(
         (receivedReceipts) {
@@ -171,26 +169,26 @@ class _CategoryFilesScreenState extends State<CategoryFilesScreen> {
   List<Receipt> _applyFilters(List<Receipt> receipts) {
     debugPrint('Aplicando filtros - Año: $_filterYear, Meses: $_filterMonthStart a $_filterMonthEnd, Orden: $_sortOption');
     debugPrint('Cantidad de recibos antes de filtrar: ${receipts.length}');
-    
+   
     List<Receipt> filteredReceipts = List.from(receipts);
-
+    
     // Aplicar filtro por año
     if (_filterYear != null) {
       filteredReceipts = filteredReceipts
           .where((receipt) => receipt.date.year == _filterYear)
           .toList();
-      
+     
       debugPrint('Después de filtrar por año $_filterYear: ${filteredReceipts.length} recibos');
     }
 
     // Aplicar filtro por rango de meses
     if (_filterYear != null && _filterMonthStart != null && _filterMonthEnd != null) {
       filteredReceipts = filteredReceipts
-          .where((receipt) =>
+          .where((receipt) => 
               receipt.date.month >= _filterMonthStart! &&
               receipt.date.month <= _filterMonthEnd!)
           .toList();
-      
+     
       debugPrint('Después de filtrar por meses $_filterMonthStart-$_filterMonthEnd: ${filteredReceipts.length} recibos');
     }
 
@@ -228,12 +226,12 @@ class _CategoryFilesScreenState extends State<CategoryFilesScreen> {
           setState(() {
             // Registrar los cambios en los filtros
             debugPrint('Filtros cambiados - Año: $year, Meses: $monthStart a $monthEnd, Orden: $sortOption');
-            
+           
             _filterYear = year;
             _filterMonthStart = monthStart;
             _filterMonthEnd = monthEnd;
             _sortOption = sortOption;
-            
+           
             // Aplicar filtros usando la lista completa original
             if (_allReceipts != null) {
               _receipts = _applyFilters(_allReceipts!);
@@ -262,13 +260,14 @@ class _CategoryFilesScreenState extends State<CategoryFilesScreen> {
     // Obtener medidas del dispositivo para responsividad
     final Size screenSize = MediaQuery.of(context).size;
     final double topPadding = MediaQuery.of(context).padding.top;
-
+    
     return Scaffold(
       body: DecorativeBackground(
         child: Column(
           children: [
             // Safe area padding - responsivo
             SizedBox(height: topPadding),
+            
             // Header with back button and category name
             CategoryHeader(
               categoryName: widget.category,
@@ -279,6 +278,7 @@ class _CategoryFilesScreenState extends State<CategoryFilesScreen> {
               },
               onFilterPress: _showFilterDialog,
             ),
+            
             // List of files
             Expanded(
               child: _isLoading
@@ -289,12 +289,15 @@ class _CategoryFilesScreenState extends State<CategoryFilesScreen> {
                           ? const EmptyCategoryMessage()
                           : _buildReceiptsList(),
             ),
+            
             // "Ver gráficas de costos" button
             ViewChartsButton(
-              onTap: () {
-                // Implementar navegación a vista de gráficas
-              },
+              categoryId: _categoryId ?? '',
+              categoryName: widget.category,
+              categoryColor: widget.categoryColor,
+              categoryIcon: widget.categoryIcon,
             ),
+            
             // Bottom navigation bar with consistent navigation
             AppBottomNavigation(
               currentIndex: 0, // Considerar actualizar según la página actual

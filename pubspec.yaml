@@ -58,6 +58,9 @@ dependencies:
   image_cropper: ^5.0.0
   intl: ^0.20.2
 
+ #Dependencia para las gráficas
+  fl_chart: ^0.70.2
+
 
   # file_picker ha sido eliminado
   

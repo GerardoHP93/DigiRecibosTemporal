@@ -1,14 +1,22 @@
+// lib/features/analytics/widgets/view_charts_button.dart
 import 'package:flutter/material.dart';
 import 'package:digirecibos/core/constants/app_dimens.dart';
 import 'package:digirecibos/core/constants/app_strings.dart';
 import 'package:digirecibos/core/constants/app_text_styles.dart';
+import 'package:digirecibos/features/analytics/screens/charts_screen.dart';
 
 class ViewChartsButton extends StatelessWidget {
-  final VoidCallback onTap;
+  final String categoryId;
+  final String categoryName;
+  final Color categoryColor;
+  final IconData categoryIcon;
 
   const ViewChartsButton({
     Key? key,
-    required this.onTap,
+    required this.categoryId,
+    required this.categoryName,
+    required this.categoryColor,
+    required this.categoryIcon,
   }) : super(key: key);
 
   @override
@@ -27,7 +35,7 @@ class ViewChartsButton extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           GestureDetector(
-            onTap: onTap,
+            onTap: () => _navigateToChartsScreen(context),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -48,6 +56,23 @@ class ViewChartsButton extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // Método para navegar a la pantalla de gráficas
+  void _navigateToChartsScreen(BuildContext context) {
+    debugPrint('Navegando a ChartsScreen para categoría: $categoryId ($categoryName)');
+    
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ChartsScreen(
+          categoryId: categoryId,
+          categoryName: categoryName,
+          categoryColor: categoryColor,
+          categoryIcon: categoryIcon,
+        ),
       ),
     );
   }
