@@ -18,6 +18,7 @@ import 'package:digirecibos/features/categories/screens/receipt_detail_screen.da
 import 'package:digirecibos/data/models/receipt.dart';
 import 'package:digirecibos/data/repositories/receipt_repository.dart';
 import 'package:digirecibos/data/services/category_manager.dart';
+import 'package:digirecibos/features/analytics/services/chart_data_service.dart';
 
 // Importar constantes
 import 'package:digirecibos/core/constants/app_colors.dart';
@@ -44,6 +45,7 @@ class CategoryFilesScreen extends StatefulWidget {
 class _CategoryFilesScreenState extends State<CategoryFilesScreen> {
   final CategoryManager _categoryManager = CategoryManager();
   final ReceiptRepository _receiptRepository = ReceiptRepository();
+  final ChartDataService _chartDataService = ChartDataService();
  
   List<Receipt> _receipts = [];
   List<Receipt>? _allReceipts; // Lista de todos los recibos sin filtrar
@@ -58,7 +60,7 @@ class _CategoryFilesScreenState extends State<CategoryFilesScreen> {
   int? _filterMonthStart;
   int? _filterMonthEnd;
 
-  // Lista de años para el filtro
+  // Lista de años disponibles en los recibos
   final List<int> _availableYears = [];
 
   // StreamSubscription para cancelar la suscripción cuando se destruye el widget
@@ -68,7 +70,6 @@ class _CategoryFilesScreenState extends State<CategoryFilesScreen> {
   void initState() {
     super.initState();
     _loadCategoryId();
-    _initAvailableYears();
   }
 
   @override
@@ -76,14 +77,6 @@ class _CategoryFilesScreenState extends State<CategoryFilesScreen> {
     // Cancelar la suscripción para evitar memory leaks y duplicados
     _receiptsSubscription?.cancel();
     super.dispose();
-  }
-
-  // Inicializar años disponibles para filtros
-  void _initAvailableYears() {
-    final currentYear = DateTime.now().year;
-    for (int i = currentYear; i >= currentYear - 5; i--) {
-      _availableYears.add(i);
-    }
   }
 
   // Encontrar el ID de la categoría basado en su nombre
@@ -117,7 +110,7 @@ class _CategoryFilesScreenState extends State<CategoryFilesScreen> {
         });
       }
     } catch (e) {
-      print('Error al cargar ID de categoría: $e');
+      debugPrint('Error al cargar ID de categoría: $e');
       setState(() {
         _isLoading = false;
         _hasError = true;
@@ -142,7 +135,12 @@ class _CategoryFilesScreenState extends State<CategoryFilesScreen> {
         (receivedReceipts) {
           setState(() {
             _allReceipts = receivedReceipts; // Guardar la lista completa
-            _receipts = _applyFilters(receivedReceipts); // Aplicar filtros actuales
+            
+            // Extraer los años disponibles de los recibos
+            _extractAvailableYears(receivedReceipts);
+            
+            // Aplicar filtros con la nueva lista de recibos
+            _receipts = _applyFilters(receivedReceipts);
             _isLoading = false;
           });
         },
@@ -162,6 +160,34 @@ class _CategoryFilesScreenState extends State<CategoryFilesScreen> {
         _hasError = true;
         _errorMessage = 'Error al cargar los recibos';
       });
+    }
+  }
+  
+  // Extraer los años disponibles de los recibos
+  void _extractAvailableYears(List<Receipt> receipts) {
+    // Limpiar la lista actual
+    _availableYears.clear();
+    
+    try {
+      // Usar el servicio de datos de gráficas para obtener los años disponibles
+      final years = _chartDataService.getAvailableYears(receipts);
+      
+      // Actualizar la lista con los años que tienen recibos
+      _availableYears.addAll(years);
+      
+      debugPrint('Años extraídos de los recibos: $_availableYears');
+      
+      // Verificar si el año actual de filtro existe en los años disponibles
+      if (_filterYear != null && !_availableYears.contains(_filterYear)) {
+        debugPrint('El año de filtro $_filterYear ya no está disponible en los recibos');
+        // Resetear el filtro de año si ya no está disponible
+        _filterYear = null;
+        _filterMonthStart = null;
+        _filterMonthEnd = null;
+      }
+    } catch (e) {
+      debugPrint('Error al extraer años disponibles: $e');
+      // En caso de error, no modificamos los años disponibles
     }
   }
 

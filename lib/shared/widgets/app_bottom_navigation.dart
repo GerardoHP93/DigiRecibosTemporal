@@ -28,8 +28,7 @@ class AppBottomNavigation extends StatelessWidget {
       padding: EdgeInsets.symmetric(vertical: navHeight),
       decoration: BoxDecoration(
         color: AppColors.cardBackground,
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(AppDimens.radiusXXL)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppDimens.radiusXXL)),
         boxShadow: [
           BoxShadow(
             color: AppColors.shadow,
@@ -37,6 +36,12 @@ class AppBottomNavigation extends StatelessWidget {
             offset: Offset(0, -2),
           ),
         ],
+        border: Border(
+          top: BorderSide(
+            color: AppColors.primary,
+            width: 2.0,
+          ),
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,

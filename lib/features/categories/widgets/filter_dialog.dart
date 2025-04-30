@@ -70,6 +70,9 @@ class _FilterDialogState extends State<FilterDialog> {
         _selectedMonthEnd = _selectedMonthStart;
       }
     }
+    
+    debugPrint('FilterDialog iniciado - Años disponibles: ${widget.availableYears}');
+    debugPrint('FilterDialog iniciado - Valores actuales: Año=$_selectedYear, MesInicio=$_selectedMonthStart, MesFin=$_selectedMonthEnd, Orden=$_selectedSortOption');
   }
  
   void _clearFilters() {
@@ -165,6 +168,31 @@ class _FilterDialogState extends State<FilterDialog> {
   }
  
   Widget _buildYearDropdown() {
+    // Verificar que haya años disponibles
+    if (widget.availableYears.isEmpty) {
+      debugPrint('No hay años disponibles para mostrar en el dropdown');
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: AppDimens.paddingM),
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.border),
+          borderRadius: BorderRadius.circular(AppDimens.radiusS),
+        ),
+        child: DropdownButton<int?>(
+          value: null,
+          isExpanded: true,
+          underline: const SizedBox(),
+          items: const [
+            DropdownMenuItem<int?>(
+              value: null,
+              child: Text('No hay años disponibles'),
+            ),
+          ],
+          onChanged: null, // Deshabilitado
+        ),
+      );
+    }
+    
+    // Construir lista de items con los años disponibles
     final items = [
       const DropdownMenuItem<int?>(
         value: null,
@@ -175,6 +203,12 @@ class _FilterDialogState extends State<FilterDialog> {
         child: Text(year.toString()),
       )).toList(),
     ];
+    
+    // Si el año seleccionado no está en la lista de años disponibles, lo reseteamos
+    if (_selectedYear != null && !widget.availableYears.contains(_selectedYear)) {
+      debugPrint('El año seleccionado $_selectedYear no está en la lista de años disponibles. Reseteando.');
+      _selectedYear = null;
+    }
    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: AppDimens.paddingM),
