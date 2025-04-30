@@ -154,12 +154,12 @@ class _ChartsScreenState extends State<ChartsScreen> {
         }
       });
       
-      // Asegurar que el máximo no sea 0
+      // Ajustar el valor máximo para mejor visualización
       if (_maxAmount == 0) {
         _maxAmount = 100;
       } else {
-        // Redondear al siguiente múltiplo de 100 para tener una escala limpia
-        _maxAmount = ((_maxAmount / 100).ceil() * 100).toDouble();
+        // Usar un algoritmo más granular para determinar la escala
+        _maxAmount = _calculateOptimalMaxY(_maxAmount);
       }
       
       debugPrint('Datos procesados: $_chartData');
@@ -171,6 +171,34 @@ class _ChartsScreenState extends State<ChartsScreen> {
         _errorMessage = 'Error al procesar datos para la gráfica';
       });
     }
+  }
+
+  // Calcula un valor máximo óptimo para el eje Y
+  double _calculateOptimalMaxY(double rawMax) {
+    debugPrint('Calculando maxY óptimo para valor: $rawMax');
+    
+    // Para valores pequeños, usar intervalos más pequeños
+    if (rawMax < 100) {
+      return (rawMax / 20).ceil() * 20.0;
+    }
+    
+    // Para valores moderados
+    if (rawMax < 500) {
+      return (rawMax / 50).ceil() * 50.0;
+    }
+    
+    // Para valores medianos
+    if (rawMax < 1000) {
+      return (rawMax / 100).ceil() * 100.0;
+    }
+    
+    // Para valores grandes
+    if (rawMax < 5000) {
+      return (rawMax / 500).ceil() * 500.0;
+    }
+    
+    // Para valores muy grandes
+    return (rawMax / 1000).ceil() * 1000.0;
   }
   
   // Mostrar diálogo de filtros
@@ -305,6 +333,10 @@ class _ChartsScreenState extends State<ChartsScreen> {
   
   // Construye el contenido de la gráfica
   Widget _buildChartContent(String formattedAmount) {
+    // Medidas de la pantalla para responsividad
+    final screenHeight = MediaQuery.of(context).size.height;
+    final bool isSmallScreen = screenHeight < 600;
+    
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -318,16 +350,25 @@ class _ChartsScreenState extends State<ChartsScreen> {
             ),
           ),
           
-          // La gráfica
+          // Espacio ajustable según tamaño de pantalla
+          SizedBox(height: isSmallScreen ? AppDimens.paddingS : AppDimens.paddingM),
+          
+          // La gráfica (ahora con mejor aprovechamiento del espacio)
           ExpenseChart(
             monthlyData: _chartData,
             barColor: widget.categoryColor,
             maxY: _maxAmount,
           ),
           
+          // Espacio ajustable según tamaño de pantalla
+          SizedBox(height: isSmallScreen ? AppDimens.paddingS : AppDimens.paddingM),
+          
           // Sumatorio total
           Padding(
-            padding: const EdgeInsets.all(AppDimens.paddingL),
+            padding: EdgeInsets.symmetric(
+              horizontal: AppDimens.paddingL,
+              vertical: isSmallScreen ? AppDimens.paddingS : AppDimens.paddingM,
+            ),
             child: Card(
               elevation: AppDimens.elevationM,
               shape: RoundedRectangleBorder(
@@ -356,18 +397,22 @@ class _ChartsScreenState extends State<ChartsScreen> {
             ),
           ),
           
-          // Nota informativa sobre filtros
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppDimens.paddingL,
-              vertical: AppDimens.paddingM,
+          // Nota informativa sobre filtros (ajustada para pantallas pequeñas)
+          if (!isSmallScreen)
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimens.paddingL,
+                vertical: AppDimens.paddingM,
+              ),
+              child: Text(
+                'Puedes filtrar por año y rango de meses usando el botón de filtro en la esquina superior derecha.',
+                style: AppTextStyles.bodySmall,
+                textAlign: TextAlign.center,
+              ),
             ),
-            child: Text(
-              'Puedes filtrar por año y rango de meses usando el botón de filtro en la esquina superior derecha.',
-              style: AppTextStyles.bodySmall,
-              textAlign: TextAlign.center,
-            ),
-          ),
+          
+          // Asegurar espacio al final para evitar que el contenido quede detrás de la barra de navegación
+          SizedBox(height: isSmallScreen ? AppDimens.paddingL : AppDimens.paddingXL),
         ],
       ),
     );
@@ -422,13 +467,26 @@ class _ChartsScreenState extends State<ChartsScreen> {
   // Mensaje cuando no hay recibos
   Widget _buildEmptyMessage() {
     return Center(
-      child: Padding(
+      child: Container(
+        margin: const EdgeInsets.all(AppDimens.paddingL),
         padding: const EdgeInsets.all(AppDimens.paddingL),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(AppDimens.radiusL),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.shadow.withOpacity(0.1),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(
-              Icons.insert_chart_outlined, // Cambiado por un icono disponible
+              Icons.insert_chart_outlined,
               size: 64,
               color: AppColors.textSecondary,
             ),
@@ -455,11 +513,25 @@ class _ChartsScreenState extends State<ChartsScreen> {
   }
   
   // Mensaje de error
+// Mensaje de error
   Widget _buildErrorMessage() {
     return Center(
-      child: Padding(
+      child: Container(
+        margin: const EdgeInsets.all(AppDimens.paddingL),
         padding: const EdgeInsets.all(AppDimens.paddingL),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(AppDimens.radiusL),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.shadow.withOpacity(0.1),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(
