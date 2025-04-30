@@ -7,7 +7,7 @@ import 'package:digirecibos/core/constants/app_text_styles.dart';
 
 class ExpenseChart extends StatelessWidget {
   final Map<String, double> monthlyData;
-  final Color barColor;
+  final Color barColor; // Mantenemos este parámetro por compatibilidad pero lo ignoramos
   final double maxY;
 
   const ExpenseChart({
@@ -19,6 +19,9 @@ class ExpenseChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Usar siempre el color primario de la app
+    final Color standardColor = AppColors.primary;
+    
     // Si no hay datos, mostrar mensaje
     if (monthlyData.isEmpty) {
       return _buildEmptyChart();
@@ -56,7 +59,7 @@ class ExpenseChart extends StatelessWidget {
           child: BarChart(
             BarChartData(
               alignment: BarChartAlignment.spaceAround,
-              maxY: maxY * 1.1, // 10% de espacio extra arriba para mejor visualización (reducido de 20%)
+              maxY: maxY * 1.1, // 10% de espacio extra arriba para mejor visualización
               minY: 0, // Asegurar que la gráfica comience desde 0
               barTouchData: BarTouchData(
                 enabled: true,
@@ -147,7 +150,7 @@ class ExpenseChart extends StatelessWidget {
                 getDrawingHorizontalLine: _getDrawingLine,
                 drawVerticalLine: false,
               ),
-              barGroups: _createBarGroups(),
+              barGroups: _createBarGroups(standardColor),
             ),
             swapAnimationDuration: const Duration(milliseconds: 500),
             swapAnimationCurve: Curves.easeInOut,
@@ -215,8 +218,8 @@ class ExpenseChart extends StatelessWidget {
     );
   }
 
-  // Crea los grupos de barras para el gráfico
-  List<BarChartGroupData> _createBarGroups() {
+  // Crea los grupos de barras para el gráfico usando el color estándar
+  List<BarChartGroupData> _createBarGroups(Color standardColor) {
     final List<BarChartGroupData> barGroups = [];
     final months = monthlyData.keys.toList();
     
@@ -238,7 +241,7 @@ class ExpenseChart extends StatelessWidget {
           barRods: [
             BarChartRodData(
               toY: value,
-              color: barColor.withOpacity(0.7),
+              color: standardColor.withOpacity(0.7),
               width: barWidth,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(AppDimens.radiusS),
@@ -247,7 +250,7 @@ class ExpenseChart extends StatelessWidget {
               backDrawRodData: BackgroundBarChartRodData(
                 show: true,
                 toY: maxY * 1.1, // Ajustar al mismo valor que maxY en BarChartData
-                color: AppColors.border.withOpacity(0.1),
+color: AppColors.border.withOpacity(0.1),
               ),
             ),
           ],

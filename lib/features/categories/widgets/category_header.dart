@@ -1,3 +1,4 @@
+// lib/features/categories/widgets/category_header.dart
 import 'package:flutter/material.dart';
 import 'package:digirecibos/core/constants/app_colors.dart';
 import 'package:digirecibos/core/constants/app_dimens.dart';
@@ -26,14 +27,36 @@ class CategoryHeader extends StatelessWidget {
     final bool isSmallScreen = screenWidth < 360;
     final double iconPadding = isSmallScreen ? AppDimens.paddingS : AppDimens.paddingM;
     final double textPadding = isSmallScreen ? AppDimens.paddingS : AppDimens.paddingL;
+    
+    // Calcular el ancho aproximado para el contenedor del título (60% del ancho de pantalla)
+    final double titleContainerWidth = screenWidth * 0.6;
 
-    return Padding(
-      padding: EdgeInsets.all(isSmallScreen ? AppDimens.paddingM : AppDimens.paddingL),
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.only(
+        left: isSmallScreen ? AppDimens.paddingM : AppDimens.paddingL,
+        right: isSmallScreen ? AppDimens.paddingM : AppDimens.paddingL,
+        top: MediaQuery.of(context).padding.top + AppDimens.paddingM, // Incluye el padding del sistema
+        bottom: AppDimens.paddingM,
+      ),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppColors.primaryLight, // Color claro (B0D1E9)
+            AppColors.primary,      // Color principal (95B8D1)
+          ],
+          stops: const [0.0, 1.0],
+        ),
+      ),
       child: Row(
         children: [
+          // Botón de regreso
           Container(
             decoration: BoxDecoration(
-              border: Border.all(color: categoryColor, width: AppDimens.borderWidth),
+              color: Colors.white,
+              border: Border.all(color: AppColors.primary, width: AppDimens.borderWidth),
               borderRadius: BorderRadius.circular(AppDimens.radiusM),
             ),
             child: IconButton(
@@ -43,16 +66,20 @@ class CategoryHeader extends StatelessWidget {
               onPressed: onBackPress,
             ),
           ),
+          
           SizedBox(width: isSmallScreen ? AppDimens.paddingM : AppDimens.paddingL),
+          
+          // Contenedor del título con ancho fijo
           Container(
+            width: titleContainerWidth,
             padding: EdgeInsets.symmetric(
               horizontal: textPadding,
               vertical: AppDimens.paddingS,
             ),
             decoration: BoxDecoration(
-              color: AppColors.cardBackground,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(AppDimens.radiusXXL),
-              border: Border.all(color: categoryColor, width: AppDimens.borderWidth),
+              border: Border.all(color: AppColors.primary, width: AppDimens.borderWidth),
               boxShadow: [
                 BoxShadow(
                   color: AppColors.shadow.withOpacity(0.1),
@@ -62,19 +89,28 @@ class CategoryHeader extends StatelessWidget {
               ],
             ),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                // Mantener el color original del icono
                 Icon(categoryIcon, color: categoryColor),
                 const SizedBox(width: AppDimens.paddingS),
-                Text(
-                  categoryName,
-                  style: AppTextStyles.subtitle,
+                Expanded(
+                  child: Text(
+                    categoryName,
+                    style: AppTextStyles.subtitle,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ],
             ),
           ),
+          
           const Spacer(),
+          
+          // Icono de filtro
           IconButton(
-            icon: const Icon(Icons.filter_list),
+            icon: const Icon(Icons.filter_list, color: Colors.white),
             onPressed: onFilterPress,
           ),
         ],

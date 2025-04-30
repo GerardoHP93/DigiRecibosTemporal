@@ -120,7 +120,7 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Detalle del recibo'),
-        backgroundColor: widget.categoryColor,
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         actions: [
           if (!_isDeleting)
@@ -185,7 +185,7 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
                     Text(
                       widget.receipt.formattedAmount,
                       style: AppTextStyles.title.copyWith(
-                        color: widget.categoryColor,
+                        color: AppColors.primary,
                         fontSize: 24,
                       ),
                     ),
@@ -200,13 +200,13 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
               Container(
                 padding: const EdgeInsets.all(AppDimens.paddingS),
                 decoration: BoxDecoration(
-                  color: widget.categoryColor.withOpacity(0.1),
+                  color: AppColors.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(AppDimens.radiusS),
                 ),
                 child: Text(
                   widget.receipt.fileName,
                   style: AppTextStyles.bodySmall.copyWith(
-                    color: widget.categoryColor,
+                    color: AppColors.primary,
                   ),
                 ),
               ),

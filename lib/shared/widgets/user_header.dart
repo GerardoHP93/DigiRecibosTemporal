@@ -1,10 +1,10 @@
 // lib/shared/widgets/user_header.dart
-
 import 'package:flutter/material.dart';
 import 'package:digirecibos/core/constants/app_dimens.dart';
 import 'package:digirecibos/core/constants/app_strings.dart';
 import 'package:digirecibos/core/constants/app_text_styles.dart';
 import 'package:digirecibos/data/services/profile_service.dart';
+import 'package:digirecibos/core/constants/app_colors.dart';
 
 class UserHeader extends StatefulWidget {
   final String username;
@@ -68,8 +68,25 @@ class _UserHeaderState extends State<UserHeader> {
     final double radius = widget.avatarRadius ??
         (screenWidth < 360 ? 16 : AppDimens.avatarRadiusM);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppDimens.paddingL),
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.only(
+        left: AppDimens.paddingL,
+        right: AppDimens.paddingL,
+        top: MediaQuery.of(context).padding.top + AppDimens.paddingM, // Incluye el padding del sistema
+        bottom: AppDimens.paddingL,
+      ),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppColors.primaryLight, // Color claro (B0D1E9)
+            AppColors.primary,      // Color principal (95B8D1)
+          ],
+          stops: const [0.0, 1.0],
+        ),
+      ),
       child: Row(
         children: [
           _isLoadingImage
@@ -81,6 +98,7 @@ class _UserHeaderState extends State<UserHeader> {
                     height: 16,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
+                      color: Colors.white,
                     ),
                   ),
                 )
@@ -93,18 +111,22 @@ class _UserHeaderState extends State<UserHeader> {
                           : const AssetImage('assets/profile.jpg'),
                 ),
           const SizedBox(width: AppDimens.paddingM),
-          widget.isLoading
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
+          Expanded(
+            child: widget.isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : Text(
+                    "${AppStrings.greeting} ${widget.username}!",
+                    style: AppTextStyles.greeting.copyWith(color: Colors.white),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                )
-              : Text(
-                  "${AppStrings.greeting} ${widget.username}!",
-                  style: AppTextStyles.greeting,
-                ),
+          ),
         ],
       ),
     );

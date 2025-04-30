@@ -1,5 +1,4 @@
 // lib/shared/widgets/app_bottom_navigation.dart
-
 import 'package:digirecibos/shared/widgets/scan_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:digirecibos/features/home/screens/home_screen.dart';
@@ -50,7 +49,7 @@ class AppBottomNavigation extends StatelessWidget {
             icon: Icon(
               Icons.home,
               size: iconSize,
-              color: currentIndex == 0 ? AppColors.accent : null,
+              color: currentIndex == 0 ? AppColors.primary : null,
             ),
             onPressed: () {
               if (currentIndex != 0) {
@@ -72,7 +71,7 @@ class AppBottomNavigation extends StatelessWidget {
             icon: Icon(
               Icons.settings,
               size: iconSize,
-              color: currentIndex == 2 ? AppColors.accent : null,
+              color: currentIndex == 2 ? AppColors.primary : null,
             ),
             onPressed: () {
               if (currentIndex != 2) {

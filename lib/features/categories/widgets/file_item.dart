@@ -1,5 +1,4 @@
 // lib/features/categories/widgets/file_item.dart
-
 import 'package:flutter/material.dart';
 import 'package:digirecibos/core/constants/app_colors.dart';
 import 'package:digirecibos/core/constants/app_dimens.dart';
@@ -21,6 +20,9 @@ class FileItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Usar siempre el color primario de la app independientemente del color de categoría pasado
+    final Color standardColor = AppColors.primary;
+    
     return Container(
       margin: const EdgeInsets.only(bottom: AppDimens.paddingM),
       decoration: BoxDecoration(
@@ -45,7 +47,7 @@ class FileItem extends StatelessWidget {
             child: Row(
               children: [
                 // Icono o miniatura
-                _buildThumbnail(),
+                _buildThumbnail(standardColor),
                 
                 const SizedBox(width: AppDimens.paddingM),
                 
@@ -60,7 +62,7 @@ class FileItem extends StatelessWidget {
                           Icon(
                             Icons.calendar_today,
                             size: AppDimens.iconXS,
-                            color: categoryColor,
+                            color: standardColor,
                           ),
                           const SizedBox(width: AppDimens.paddingXS),
                           Text(
@@ -78,14 +80,14 @@ class FileItem extends StatelessWidget {
                           Icon(
                             Icons.attach_money,
                             size: AppDimens.iconXS,
-                            color: categoryColor,
+                            color: standardColor,
                           ),
                           const SizedBox(width: AppDimens.paddingXS),
                           Text(
                             receipt.formattedAmount,
                             style: AppTextStyles.body.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: categoryColor,
+                              color: standardColor,
                             ),
                           ),
                         ],
@@ -131,14 +133,14 @@ class FileItem extends StatelessWidget {
     );
   }
 
-  Widget _buildThumbnail() {
+  Widget _buildThumbnail(Color standardColor) {
     final double thumbnailSize = 50; // Tamaño fijo para la miniatura
     
     return Container(
       width: thumbnailSize,
       height: thumbnailSize,
       decoration: BoxDecoration(
-        color: categoryColor.withOpacity(0.1),
+        color: standardColor.withOpacity(0.1),
         borderRadius: BorderRadius.circular(AppDimens.radiusM),
       ),
       child: receipt.isPdf
@@ -146,7 +148,7 @@ class FileItem extends StatelessWidget {
               child: Icon(
                 Icons.picture_as_pdf,
                 size: 32,
-                color: categoryColor,
+                color: standardColor,
               ),
             )
           : ClipRRect(
@@ -160,7 +162,7 @@ class FileItem extends StatelessWidget {
                     height: 24,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: categoryColor,
+                      color: standardColor,
                     ),
                   ),
                 ),

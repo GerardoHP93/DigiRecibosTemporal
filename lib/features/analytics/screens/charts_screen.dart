@@ -225,12 +225,9 @@ class _ChartsScreenState extends State<ChartsScreen> {
     );
   }
 
+  // También es necesario actualizar la estructura del widget build para quitar el padding adicional:
   @override
   Widget build(BuildContext context) {
-    // Obtener medidas para responsividad
-    final Size screenSize = MediaQuery.of(context).size;
-    final double topPadding = MediaQuery.of(context).padding.top;
-    
     // Formatear el monto total
     final formattedAmount = NumberFormat.currency(
       symbol: '\$',
@@ -242,10 +239,7 @@ class _ChartsScreenState extends State<ChartsScreen> {
       body: DecorativeBackground(
         child: Column(
           children: [
-            // Safe area padding
-            SizedBox(height: topPadding),
-            
-            // Header con título y botón de filtro
+            // Header con título y botón de filtro (ahora con padding integrado)
             _buildHeader(),
             
             // Contenido principal
@@ -267,16 +261,34 @@ class _ChartsScreenState extends State<ChartsScreen> {
     );
   }
   
-  // Construye el encabezado con título y botón de filtro
+    // Construye el encabezado con título y botón de filtro
   Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.all(AppDimens.paddingL),
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.only(
+        left: AppDimens.paddingL,
+        right: AppDimens.paddingL,
+        top: MediaQuery.of(context).padding.top + AppDimens.paddingM, // Incluye el padding del sistema
+        bottom: AppDimens.paddingM,
+      ),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppColors.primaryLight, // Color claro (B0D1E9)
+            AppColors.primary,      // Color principal (95B8D1)
+          ],
+          stops: const [0.0, 1.0],
+        ),
+      ),
       child: Row(
         children: [
           // Botón de regreso
           Container(
             decoration: BoxDecoration(
-              border: Border.all(color: widget.categoryColor, width: AppDimens.borderWidth),
+              color: Colors.white,
+              border: Border.all(color: AppColors.primary, width: AppDimens.borderWidth),
               borderRadius: BorderRadius.circular(AppDimens.radiusM),
             ),
             child: IconButton(
@@ -296,9 +308,9 @@ class _ChartsScreenState extends State<ChartsScreen> {
                 vertical: AppDimens.paddingS,
               ),
               decoration: BoxDecoration(
-                color: AppColors.cardBackground,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(AppDimens.radiusXXL),
-                border: Border.all(color: widget.categoryColor, width: AppDimens.borderWidth),
+                border: Border.all(color: AppColors.primary, width: AppDimens.borderWidth),
                 boxShadow: [
                   BoxShadow(
                     color: AppColors.shadow.withOpacity(0.1),
@@ -308,22 +320,26 @@ class _ChartsScreenState extends State<ChartsScreen> {
                 ],
               ),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(widget.categoryIcon, color: widget.categoryColor),
+                  Icon(widget.categoryIcon, color: widget.categoryColor), // Mantener color original del icono
                   const SizedBox(width: AppDimens.paddingS),
-                  Text(
-                    'Gráfica: ${widget.categoryName}',
-                    style: AppTextStyles.subtitle,
-                    overflow: TextOverflow.ellipsis,
+                  Expanded(
+                    child: Text(
+                      'Gráfica: ${widget.categoryName}',
+                      style: AppTextStyles.subtitle,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ],
               ),
             ),
           ),
           
-          // Botón de filtro
+          // Icono de filtro
           IconButton(
-            icon: const Icon(Icons.filter_list),
+            icon: const Icon(Icons.filter_list, color: Colors.white),
             onPressed: _showFilterDialog,
           ),
         ],
@@ -356,7 +372,7 @@ class _ChartsScreenState extends State<ChartsScreen> {
           // La gráfica (ahora con mejor aprovechamiento del espacio)
           ExpenseChart(
             monthlyData: _chartData,
-            barColor: widget.categoryColor,
+            barColor: AppColors.primary, // Usar color uniforme en lugar de widget.categoryColor
             maxY: _maxAmount,
           ),
           
@@ -386,7 +402,7 @@ class _ChartsScreenState extends State<ChartsScreen> {
                     Text(
                       formattedAmount,
                       style: TextStyle(
-                        color: widget.categoryColor,
+                        color: AppColors.primary,
                         fontWeight: FontWeight.bold,
                         fontSize: AppDimens.fontXL,
                       ),

@@ -28,7 +28,7 @@ import 'package:digirecibos/core/constants/app_text_styles.dart';
 
 class CategoryFilesScreen extends StatefulWidget {
   final String category;
-  final Color categoryColor;
+  final Color categoryColor; // Seguirá recibiendo este parámetro pero internamente usaremos AppColors.primary
   final IconData categoryIcon;
   
   const CategoryFilesScreen({
@@ -275,64 +275,60 @@ class _CategoryFilesScreenState extends State<CategoryFilesScreen> {
       MaterialPageRoute(
         builder: (context) => ReceiptDetailScreen(
           receipt: receipt,
-          categoryColor: widget.categoryColor,
+          categoryColor: AppColors.primary,
         ),
       ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // Obtener medidas del dispositivo para responsividad
-    final Size screenSize = MediaQuery.of(context).size;
-    final double topPadding = MediaQuery.of(context).padding.top;
-    
-    return Scaffold(
-      body: DecorativeBackground(
-        child: Column(
-          children: [
-            // Safe area padding - responsivo
-            SizedBox(height: topPadding),
-            
-            // Header with back button and category name
-            CategoryHeader(
-              categoryName: widget.category,
-              categoryColor: widget.categoryColor,
-              categoryIcon: widget.categoryIcon,
-              onBackPress: () {
-                Navigator.pop(context);
-              },
-              onFilterPress: _showFilterDialog,
-            ),
-            
-            // List of files
-            Expanded(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _hasError
-                      ? _buildErrorMessage()
-                      : _receipts.isEmpty
-                          ? const EmptyCategoryMessage()
-                          : _buildReceiptsList(),
-            ),
-            
-            // "Ver gráficas de costos" button
-            ViewChartsButton(
-              categoryId: _categoryId ?? '',
-              categoryName: widget.category,
-              categoryColor: widget.categoryColor,
-              categoryIcon: widget.categoryIcon,
-            ),
-            
-            // Bottom navigation bar with consistent navigation
-            AppBottomNavigation(
-              currentIndex: 0, // Considerar actualizar según la página actual
-            ),
-          ],
+// lib/features/categories/screens/category_files_screen.dart
+    // En el método build, reemplaza la estructura existente con:
+
+    @override
+    Widget build(BuildContext context) {
+      return Scaffold(
+        body: DecorativeBackground(
+          child: Column(
+            children: [
+              // Header with back button and category name (ahora con padding integrado)
+              CategoryHeader(
+                categoryName: widget.category,
+                categoryColor: widget.categoryColor,
+                categoryIcon: widget.categoryIcon,
+                onBackPress: () {
+                  Navigator.pop(context);
+                },
+                onFilterPress: _showFilterDialog,
+              ),
+              
+              // List of files
+              Expanded(
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _hasError
+                        ? _buildErrorMessage()
+                        : _receipts.isEmpty
+                            ? const EmptyCategoryMessage()
+                            : _buildReceiptsList(),
+              ),
+              
+              // "Ver gráficas de costos" button
+              ViewChartsButton(
+                categoryId: _categoryId ?? '',
+                categoryName: widget.category,
+                categoryColor: widget.categoryColor,
+                categoryIcon: widget.categoryIcon,
+              ),
+              
+              // Bottom navigation bar with consistent navigation
+              AppBottomNavigation(
+                currentIndex: 0, // Considerar actualizar según la página actual
+              ),
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
+    }
 
   Widget _buildErrorMessage() {
     return Center(
@@ -379,7 +375,7 @@ class _CategoryFilesScreenState extends State<CategoryFilesScreen> {
         itemBuilder: (context, index) {
           return FileItem(
             receipt: _receipts[index],
-            categoryColor: widget.categoryColor,
+            categoryColor: AppColors.primary,
             onTap: () => _navigateToReceiptDetail(_receipts[index]),
           );
         },

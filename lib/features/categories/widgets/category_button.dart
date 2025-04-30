@@ -1,3 +1,4 @@
+// lib/features/categories/widgets/category_button.dart
 import 'package:flutter/material.dart';
 import 'package:digirecibos/core/constants/app_colors.dart';
 import 'package:digirecibos/core/constants/app_dimens.dart';
@@ -6,7 +7,7 @@ import 'package:digirecibos/core/constants/app_text_styles.dart';
 class CategoryButton extends StatelessWidget {
   final String emoji;
   final String label;
-  final Color color;
+  final Color color; // Mantenemos este parámetro por compatibilidad pero lo ignoramos
   final String id;
   final bool isDefault;
   final VoidCallback onTap;
@@ -39,7 +40,7 @@ class CategoryButton extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(AppDimens.radiusCircular),
-        border: Border.all(color: color, width: AppDimens.borderWidth),
+        border: Border.all(color: AppColors.primary, width: AppDimens.borderWidth), // Usar color uniforme
         boxShadow: [
           BoxShadow(
             color: AppColors.shadow,
