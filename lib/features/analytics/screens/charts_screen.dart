@@ -12,6 +12,7 @@ import 'package:digirecibos/features/analytics/widgets/expense_chart.dart';
 import 'package:digirecibos/shared/widgets/app_bottom_navigation.dart';
 import 'package:digirecibos/shared/widgets/decorative_background.dart';
 import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart'; // Importar para inicializar datos locales
 
 class ChartsScreen extends StatefulWidget {
   final String categoryId;
@@ -50,11 +51,30 @@ class _ChartsScreenState extends State<ChartsScreen> {
   Map<String, double> _chartData = {};
   double _totalAmount = 0;
   double _maxAmount = 0;
+  
+  // Flag para indicar si los datos de localización han sido inicializados
+  bool _localeInitialized = false;
 
   @override
   void initState() {
     super.initState();
+    _initializeLocale();
     _loadReceipts();
+  }
+  
+  // Inicializar datos de localización para formato de fechas
+  Future<void> _initializeLocale() async {
+    try {
+      // Inicializar datos de localización para español
+      await initializeDateFormatting('es', null);
+      setState(() {
+        _localeInitialized = true;
+      });
+      debugPrint('Datos de localización inicializados correctamente');
+    } catch (e) {
+      debugPrint('Error al inicializar datos de localización: $e');
+      // Si hay error, seguimos con el código, pero pueden ocurrir errores de formato
+    }
   }
 
   Future<void> _loadReceipts() async {
@@ -363,16 +383,40 @@ class _ChartsScreenState extends State<ChartsScreen> {
       return 'Gastos del año $_selectedYear';
     }
     
-    // Si inicio y fin de mes son iguales, mostrar solo un mes
-    if (_selectedMonthStart == _selectedMonthEnd) {
-      final monthName = DateFormat('MMMM', 'es').format(DateTime(_selectedYear!, _selectedMonthStart!));
-      return 'Gastos de $monthName de $_selectedYear';
+    // Manejo de error para prevenir la excepción de localización
+    if (!_localeInitialized) {
+      // Fallback a nombres de meses en español sin depender de la localización
+      final List<String> meses = [
+        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+      ];
+      
+      // Si inicio y fin de mes son iguales, mostrar solo un mes
+      if (_selectedMonthStart == _selectedMonthEnd) {
+        return 'Gastos de ${meses[_selectedMonthStart! - 1]} de $_selectedYear';
+      }
+      
+      // Mostrar rango de meses
+      return 'Gastos de ${meses[_selectedMonthStart! - 1]} a ${meses[_selectedMonthEnd! - 1]} de $_selectedYear';
     }
     
-    // Mostrar rango de meses
-    final startMonthName = DateFormat('MMMM', 'es').format(DateTime(_selectedYear!, _selectedMonthStart!));
-    final endMonthName = DateFormat('MMMM', 'es').format(DateTime(_selectedYear!, _selectedMonthEnd!));
-    return 'Gastos de $startMonthName a $endMonthName de $_selectedYear';
+    try {
+      // Si inicio y fin de mes son iguales, mostrar solo un mes
+      if (_selectedMonthStart == _selectedMonthEnd) {
+        final monthName = DateFormat('MMMM', 'es').format(DateTime(_selectedYear!, _selectedMonthStart!));
+        return 'Gastos de $monthName de $_selectedYear';
+      }
+      
+      // Mostrar rango de meses
+      final startMonthName = DateFormat('MMMM', 'es').format(DateTime(_selectedYear!, _selectedMonthStart!));
+      final endMonthName = DateFormat('MMMM', 'es').format(DateTime(_selectedYear!, _selectedMonthEnd!));
+      return 'Gastos de $startMonthName a $endMonthName de $_selectedYear';
+    } catch (e) {
+      debugPrint('Error al formatear nombres de meses: $e');
+      
+      // Fallback a nombres básicos si hay error
+      return 'Gastos de mes $_selectedMonthStart a mes $_selectedMonthEnd de $_selectedYear';
+    }
   }
   
   // Mensaje cuando no hay recibos
