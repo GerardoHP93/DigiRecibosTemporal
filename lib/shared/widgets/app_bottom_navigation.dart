@@ -48,12 +48,14 @@ class AppBottomNavigation extends StatelessWidget {
               color: currentIndex == 0 ? AppColors.accent : null,
             ),
             onPressed: () {
-              if (currentIndex != 0) {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => HomeScreen()),
-                );
-              }
+              debugPrint('Botón Home presionado, navegando a HomeScreen');
+              // Solución más agresiva: siempre navegamos al Home usando pushAndRemoveUntil
+              // para eliminar todas las rutas anteriores
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => HomeScreen()),
+                (route) => false, // Elimina todas las rutas anteriores
+              );
             },
           ),
           IconButton(
@@ -71,6 +73,7 @@ class AppBottomNavigation extends StatelessWidget {
             ),
             onPressed: () {
               if (currentIndex != 2) {
+                debugPrint('Navegando a Settings');
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => SettingsScreen()),

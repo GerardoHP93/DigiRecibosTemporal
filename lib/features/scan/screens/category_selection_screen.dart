@@ -59,7 +59,7 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
         });
       }
     } catch (e) {
-      print('Error al cargar categorías: $e');
+      debugPrint('Error al cargar categorías: $e');
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -107,6 +107,174 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
     }
   }
 
+  /// Verifica si ya existe un recibo con el mismo monto y fecha en la categoría seleccionada
+  Future<bool> _checkForDuplicateReceipt() async {
+    if (_selectedCategoryId == null || 
+        widget.receiptData.amount == null || 
+        widget.receiptData.date == null) {
+      return false;
+    }
+
+    try {
+      // Obtener todos los recibos de la categoría seleccionada
+      final receiptsStream = _receiptRepository.getReceiptsByCategory(_selectedCategoryId!);
+      
+      // Convertir stream a lista para verificar duplicados
+      final receipts = await receiptsStream.first;
+      
+      // Buscar recibos con la misma fecha y monto
+      final duplicates = receipts.where((receipt) => 
+        receipt.date.year == widget.receiptData.date!.year &&
+        receipt.date.month == widget.receiptData.date!.month &&
+        receipt.date.day == widget.receiptData.date!.day &&
+        receipt.amount == widget.receiptData.amount
+      ).toList();
+      
+      // Retornar true si se encontraron duplicados
+      return duplicates.isNotEmpty;
+    } catch (e) {
+      debugPrint('Error al verificar duplicados: $e');
+      return false; // En caso de error, continuar con el guardado
+    }
+  }
+
+/// Muestra diálogo de confirmación para recibos duplicados
+/// Muestra diálogo de confirmación para recibos duplicados
+Future<bool?> _showDuplicateWarning() async {
+  return await showDialog<bool?>(
+    context: context,
+    barrierDismissible: true, // Permitir cerrar al hacer clic fuera del diálogo
+    builder: (BuildContext dialogContext) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppDimens.radiusL),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(0), // Sin padding para controlar mejor el espacio
+          child: Column(
+            mainAxisSize: MainAxisSize.min, // Para que el diálogo sea compacto
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Encabezado con título y botón de cierre
+              Container(
+                padding: const EdgeInsets.fromLTRB(24, 16, 8, 16),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(AppDimens.radiusL),
+                    topRight: Radius.circular(AppDimens.radiusL),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Posible recibo duplicado',
+                        style: TextStyle(
+                          fontSize: AppDimens.fontL,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                    // Botón de cierre separado con buen espaciado
+                    IconButton(
+                      icon: Icon(
+                        Icons.close,
+                        color: Colors.grey[600],
+                      ),
+                      onPressed: () {
+                        Navigator.pop(dialogContext); // Solo cierra el diálogo
+                      },
+                      padding: EdgeInsets.zero,
+                      constraints: BoxConstraints(), // Permite tamaño personalizado
+                      iconSize: 24,
+                      splashRadius: 20,
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Contenido del diálogo
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
+                child: Text(
+                  'Se ha detectado que existe un recibo en la categoría con el mismo monto y fecha. '
+                  'Asegúrate de no estar subiendo el mismo recibo.',
+                  style: TextStyle(fontSize: AppDimens.fontM),
+                ),
+              ),
+              
+              // Botones de acción
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(dialogContext, false); // Verificar
+                      },
+                      child: Text(
+                        'Verificar',
+                        style: TextStyle(color: AppColors.textSecondary),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(dialogContext, true); // Guardar de todas formas
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Text('Guardar de todas formas'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+  /// Navega a la pantalla de categoría para verificar recibos existentes
+  void _navigateToCategoryToVerify() {
+    if (_selectedCategoryId == null) return;
+
+    try {
+      // Encontrar la categoría seleccionada
+      final selectedCategory = _categories.firstWhere(
+        (category) => category['id'] == _selectedCategoryId,
+      );
+      
+      // Navegar a la pantalla de archivos de la categoría seleccionada
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CategoryFilesScreen(
+            category: selectedCategory['name'] as String,
+            categoryColor: selectedCategory['color'] as Color,
+            categoryIcon: _getIconForEmoji(selectedCategory['emoji'] as String),
+          ),
+        ),
+      );
+    } catch (e) {
+      debugPrint('Error al navegar a la categoría: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Error al abrir la categoría'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
+
   Future<void> _saveReceiptToCategory() async {
     if (_selectedCategoryId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -116,6 +284,26 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
         ),
       );
       return;
+    }
+
+    // Verificar posibles duplicados antes de guardar
+    final hasDuplicates = await _checkForDuplicateReceipt();
+    
+    if (hasDuplicates) {
+      final shouldContinueSaving = await _showDuplicateWarning();
+      
+      // Si el diálogo se cerró con la X o haciendo clic fuera, shouldContinueSaving será null
+      // En este caso, simplemente retornamos sin hacer nada
+      if (shouldContinueSaving == null) {
+        return;
+      }
+      
+      if (shouldContinueSaving == false) {
+        // El usuario elige verificar los recibos existentes
+        _navigateToCategoryToVerify();
+        return;
+      }
+      // Si shouldContinueSaving es true, continuar con el guardado normal
     }
 
     setState(() {
