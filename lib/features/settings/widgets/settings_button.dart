@@ -21,13 +21,22 @@ class SettingsButton extends StatelessWidget {
       width: double.infinity,
       height: AppDimens.buttonHeight,
       decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(AppDimens.radiusCircular), // Cambiado a radiusCircular para bordes más redondeados
         border: Border.all(color: Colors.black12),
-        borderRadius: BorderRadius.circular(AppDimens.radiusCircular),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadow.withOpacity(0.1),
+            blurRadius: AppDimens.elevationS,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Material(
-        color: AppColors.background,
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(AppDimens.radiusCircular), // Importante: aplicar el mismo radio al Material
         child: InkWell(
-          borderRadius: BorderRadius.circular(AppDimens.radiusCircular),
+          borderRadius: BorderRadius.circular(AppDimens.radiusCircular), // Importante: aplicar el mismo radio al InkWell
           onTap: onPressed,
           child: Center(
             child: Text(

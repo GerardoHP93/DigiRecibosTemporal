@@ -1,4 +1,6 @@
-// lib/features/settings/screens/settings_screen.dart
+// lib/features/settings/screens/settings_screen.dart - No necesita cambios
+// Este archivo está bien, ya que utiliza el widget SettingsButton que hemos modificado
+// El problema estaba en el widget SettingsButton, no en la pantalla que lo usa
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -136,6 +138,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false, // Agregado para evitar el desplazamiento del teclado
       body: DecorativeBackground(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

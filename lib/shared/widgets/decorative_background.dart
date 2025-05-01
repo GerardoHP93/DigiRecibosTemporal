@@ -15,7 +15,7 @@ class DecorativeBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     // Fondo limpio sin círculos
     return Container(
-      color: Colors.white,
+      color: AppColors.background,
       child: child,
     );
   }

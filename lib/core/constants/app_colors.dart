@@ -8,7 +8,7 @@ class AppColors {
   static const Color accentLight = Color(0xFF8BB8D4);
 
   // Colores de fondos
-  static const Color background = Colors.white;
+  static const Color background = Color(0xFFFAFAFA);
   static const Color cardBackground = Colors.white;
 
   // Colores de textos
