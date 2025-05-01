@@ -273,6 +273,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false, // Evita que el contenido se desplace cuando aparece el teclado
       body: RefreshIndicator(
         onRefresh: _loadCategories,
         child: DecorativeBackground(

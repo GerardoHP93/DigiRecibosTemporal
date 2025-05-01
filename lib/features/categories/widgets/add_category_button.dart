@@ -23,7 +23,7 @@ class AddCategoryButton extends StatelessWidget {
         height: buttonSize,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: Colors.black, width: AppDimens.borderWidth),
+          border: Border.all(color: AppColors.categoryColor, width: AppDimens.borderWidth),
           boxShadow: [
             BoxShadow(
               color: AppColors.shadow,
@@ -35,7 +35,7 @@ class AddCategoryButton extends StatelessWidget {
         ),
         child: Icon(
           Icons.add, 
-          color: Colors.black, 
+          color: AppColors.categoryColorDark, 
           size: buttonSize * 0.64, // Tamaño proporcional del ícono
         ),
       ),

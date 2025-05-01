@@ -287,6 +287,7 @@ class _CategoryFilesScreenState extends State<CategoryFilesScreen> {
     @override
     Widget build(BuildContext context) {
       return Scaffold(
+        resizeToAvoidBottomInset: false, // Evita que el contenido se desplace cuando aparece el teclado
         body: DecorativeBackground(
           child: Column(
             children: [

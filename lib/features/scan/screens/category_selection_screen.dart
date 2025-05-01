@@ -185,6 +185,7 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false, // Evita que el contenido se desplace cuando aparece el teclado
       appBar: AppBar(
         title: const Text('Seleccionar categoría'),
         backgroundColor: AppColors.primary,

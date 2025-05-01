@@ -13,7 +13,7 @@ class AppDimens {
   static const double fontS = 12.0;
   static const double fontM = 14.0;
   static const double fontL = 16.0;
-  static const double fontXL = 18.0;
+  static const double fontXL = 20.0;
   static const double fontXXL = 24.0;
   
   // Border radius

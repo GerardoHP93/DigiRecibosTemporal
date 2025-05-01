@@ -68,14 +68,15 @@ class _UserHeaderState extends State<UserHeader> {
     final double radius = widget.avatarRadius ??
         (screenWidth < 360 ? 16 : AppDimens.avatarRadiusM);
 
+    // Altura estándar para todos los headers
+    final double standardHeight = kToolbarHeight + MediaQuery.of(context).padding.top + 10; // Añadimos 20 unidades más de altura
+
+    // Depuración para verificar la altura
+    debugPrint('UserHeader altura: $standardHeight');
+
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.only(
-        left: AppDimens.paddingL,
-        right: AppDimens.paddingL,
-        top: MediaQuery.of(context).padding.top + AppDimens.paddingM, // Incluye el padding del sistema
-        bottom: AppDimens.paddingL,
-      ),
+      height: standardHeight,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
@@ -87,47 +88,54 @@ class _UserHeaderState extends State<UserHeader> {
           stops: const [0.0, 1.0],
         ),
       ),
-      child: Row(
-        children: [
-          _isLoadingImage
-              ? CircleAvatar(
-                  radius: radius,
-                  backgroundColor: Colors.grey[300],
-                  child: const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  ),
-                )
-              : CircleAvatar(
-                  radius: radius,
-                  backgroundColor: Colors.grey[300],
-                  backgroundImage:
-                      _profileImageUrl != null && _profileImageUrl!.isNotEmpty
-                          ? NetworkImage(_profileImageUrl!) as ImageProvider
-                          : const AssetImage('assets/profile.jpg'),
-                ),
-          const SizedBox(width: AppDimens.paddingM),
-          Expanded(
-            child: widget.isLoading
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: AppDimens.paddingL,
+          right: AppDimens.paddingL,
+          top: MediaQuery.of(context).padding.top, // Incluye el padding del sistema
+        ),
+        child: Row(
+          children: [
+            _isLoadingImage
+                ? CircleAvatar(
+                    radius: radius,
+                    backgroundColor: Colors.grey[300],
+                    child: const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
                     ),
                   )
-                : Text(
-                    "${AppStrings.greeting} ${widget.username}!",
-                    style: AppTextStyles.greeting.copyWith(color: Colors.white),
-                    overflow: TextOverflow.ellipsis,
+                : CircleAvatar(
+                    radius: radius,
+                    backgroundColor: Colors.grey[300],
+                    backgroundImage:
+                        _profileImageUrl != null && _profileImageUrl!.isNotEmpty
+                            ? NetworkImage(_profileImageUrl!) as ImageProvider
+                            : const AssetImage('assets/profile.jpg'),
                   ),
-          ),
-        ],
+            const SizedBox(width: AppDimens.paddingM),
+            Expanded(
+              child: widget.isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text(
+                      "${AppStrings.greeting} ${widget.username}!",
+                      style: AppTextStyles.greeting.copyWith(color: Colors.white),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -118,6 +118,7 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false, // Evita que el contenido se desplace cuando aparece el teclado
       appBar: AppBar(
         title: const Text('Detalle del recibo'),
         backgroundColor: AppColors.primary,

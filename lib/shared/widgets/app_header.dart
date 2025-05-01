@@ -7,19 +7,28 @@ class AppHeader extends StatelessWidget {
   final String title;
   final VoidCallback? onBackPress;
   final List<Widget>? actions;
+  final double? height; // Parámetro opcional para altura personalizada
 
   const AppHeader({
     Key? key,
     required this.title,
     this.onBackPress,
     this.actions,
+    this.height,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    // Altura estándar para todos los headers
+    final double standardHeight = height ?? 
+     (kToolbarHeight + MediaQuery.of(context).padding.top + 10); // Añadimos 20 unidades más de altura
+    
+    // Depuración para verificar la altura
+    debugPrint('AppHeader altura: $standardHeight');
+    
     return Container(
       width: double.infinity,
-      height: kToolbarHeight + MediaQuery.of(context).padding.top, // Altura fija para coincidir con AppBar estándar
+      height: standardHeight,
       padding: EdgeInsets.only(
         left: AppDimens.paddingL,
         right: AppDimens.paddingL,
@@ -57,7 +66,7 @@ class AppHeader extends StatelessWidget {
             child: Text(
               title,
               style: TextStyle(
-                fontSize: AppDimens.fontL,
+                fontSize: AppDimens.fontXL,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),

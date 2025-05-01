@@ -144,6 +144,7 @@ class _OcrResultScreenState extends State<OcrResultScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false, // Evita que el contenido se desplace cuando aparece el teclado
       appBar: AppBar(
         title: const Text('Resultados del escaneo'),
         backgroundColor: AppColors.primary,
