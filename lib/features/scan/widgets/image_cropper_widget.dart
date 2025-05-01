@@ -89,6 +89,8 @@ class _ImageCropperWidgetState extends State<ImageCropperWidget> {
       setState(() {
         _isCropping = true;
       });
+      
+      debugPrint('Iniciando recorte de imagen: ${widget.imageFile.path}');
 
       CroppedFile? croppedFile = await ImageCropper().cropImage(
         sourcePath: widget.imageFile.path,
@@ -116,26 +118,35 @@ class _ImageCropperWidgetState extends State<ImageCropperWidget> {
         ],
       );
 
-      if (croppedFile != null) {
-        final croppedImage = File(croppedFile.path);
-        widget.onCropped(croppedImage);
-      } else {
-        // El usuario canceló el recorte
-        setState(() {
-          _isCropping = false;
-        });
-      }
-    } catch (e) {
-      print('Error al recortar la imagen: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Error al procesar la imagen'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+      // Importante: Asegurarnos de que _isCropping se establezca a false
+      // independientemente del resultado
       setState(() {
         _isCropping = false;
       });
+
+      if (croppedFile != null) {
+        final croppedImage = File(croppedFile.path);
+        debugPrint('Imagen recortada exitosamente: ${croppedImage.path}');
+        widget.onCropped(croppedImage);
+      } else {
+        // El usuario canceló el recorte
+        debugPrint('Recorte de imagen cancelado por el usuario');
+      }
+    } catch (e) {
+      debugPrint('Error al recortar la imagen: $e');
+      // Asegurarnos de establecer _isCropping a false incluso si hay un error
+      setState(() {
+        _isCropping = false;
+      });
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error al procesar la imagen'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
     }
   }
 }

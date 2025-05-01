@@ -28,6 +28,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
   void initState() {
     super.initState();
     _currentImage = widget.imageFile;
+    debugPrint('PreviewScreen inicializada con imagen: ${_currentImage.path}');
   }
 
   @override
@@ -56,8 +57,12 @@ class _PreviewScreenState extends State<PreviewScreen> {
             child: ImageCropperWidget(
               imageFile: _currentImage,
               onCropped: (File croppedImage) {
+                debugPrint('Imagen recortada recibida: ${croppedImage.path}');
                 setState(() {
                   _currentImage = croppedImage;
+                  // Importante: Asegurarnos de que _isProcessing se establezca a false
+                  // después de recibir la imagen recortada
+                  _isProcessing = false;
                 });
               },
               onCancel: widget.onCancel,
