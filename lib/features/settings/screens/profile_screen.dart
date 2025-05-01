@@ -11,6 +11,7 @@ import 'package:digirecibos/core/constants/app_dimens.dart';
 import 'package:digirecibos/core/constants/app_text_styles.dart';
 import 'package:digirecibos/shared/widgets/decorative_background.dart';
 import 'package:digirecibos/shared/widgets/app_bottom_navigation.dart';
+import 'package:digirecibos/shared/widgets/app_header.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -305,18 +306,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Tu perfil'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-      ),
       body: DecorativeBackground(
-        child: _isLoading
-            ? Center(child: CircularProgressIndicator())
-            : _buildProfileContent(),
-      ),
-      bottomNavigationBar: AppBottomNavigation(
-        currentIndex: 2, // Mantener el índice de "Ajustes"
+        child: Column(
+          children: [
+            // Usar el nuevo header unificado
+            AppHeader(
+              title: 'Tu perfil',
+              onBackPress: () => Navigator.pop(context),
+            ),
+            
+            // Contenido principal
+            Expanded(
+              child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _buildProfileContent(),
+            ),
+            
+            // Bottom navigation bar
+            AppBottomNavigation(
+              currentIndex: 2, // Mantener el índice de "Ajustes"
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -324,7 +335,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildProfileContent() {
     return SingleChildScrollView(
       child: Padding(
-        padding: EdgeInsets.all(AppDimens.paddingL),
+        padding: const EdgeInsets.all(AppDimens.paddingL),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [

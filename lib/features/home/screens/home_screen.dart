@@ -1,3 +1,4 @@
+// lib/features/home/screens/home_screen.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -271,99 +272,79 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Obtener medidas del dispositivo para responsividad
-    final Size screenSize = MediaQuery.of(context).size;
-    final double topPadding = MediaQuery.of(context).padding.top;
-
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: _loadCategories,
         child: DecorativeBackground(
-          child: Stack(
+          child: Column(
             children: [
-              // Main content
-              ListView(
-                children: [
-                  // Safe area padding - responsiva
-                  SizedBox(height: topPadding + AppDimens.paddingL),
+              // UserHeader que ahora usa todo el ancho y llega al borde superior
+              UserHeader(
+                username: username,
+                isLoading: isLoading,
+              ),
 
-                  // Header with profile image and greeting
-                  UserHeader(
-                    username: username,
-                    isLoading: isLoading,
-                  ),
-
-                  SizedBox(
-                      height: screenSize.height * 0.05), // Padding responsivo
-
-                  // Category buttons
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: screenSize.width * 0.08, // Padding responsivo
-                    ),
-                    child: isLoadingCategories
-                        ? const Center(child: CircularProgressIndicator())
-                        : Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              ...categories.map((category) => Padding(
-                                    padding: const EdgeInsets.only(
-                                        bottom: AppDimens.paddingL),
-                                    child: CategoryButton(
-                                      emoji: category['emoji'] as String,
-                                      label: category['name'] as String,
-                                      color: category['color'] as Color,
-                                      id: category['id'] as String,
-                                      isDefault: category['isDefault'] as bool,
-                                      categoryIcon: _getIconForEmoji(
-                                          category['emoji'] as String),
-                                      onTap: () {
-                                        // Navigate to the category files screen
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                CategoryFilesScreen(
-                                              category:
-                                                  category['name'] as String,
-                                              categoryColor:
-                                                  category['color'] as Color,
-                                              categoryIcon: _getIconForEmoji(
-                                                  category['emoji'] as String),
-                                            ),
+              // Lista de categorías en un scrollable
+              Expanded(
+                child: isLoadingCategories
+                    ? const Center(child: CircularProgressIndicator())
+                    : Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: MediaQuery.of(context).size.width * 0.08,
+                        ),
+                        child: ListView(
+                          children: [
+                            SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                            ...categories.map((category) => Padding(
+                                  padding: const EdgeInsets.only(
+                                      bottom: AppDimens.paddingL),
+                                  child: CategoryButton(
+                                    emoji: category['emoji'] as String,
+                                    label: category['name'] as String,
+                                    color: category['color'] as Color,
+                                    id: category['id'] as String,
+                                    isDefault: category['isDefault'] as bool,
+                                    categoryIcon: _getIconForEmoji(
+                                        category['emoji'] as String),
+                                    onTap: () {
+                                      // Navigate to the category files screen
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              CategoryFilesScreen(
+                                            category:
+                                                category['name'] as String,
+                                            categoryColor:
+                                                category['color'] as Color,
+                                            categoryIcon: _getIconForEmoji(
+                                                category['emoji'] as String),
                                           ),
-                                        ).then((_) {
-                                          // Recargar las categorías al volver
-                                          _loadCategories();
-                                        });
-                                      },
-                                      onDelete: !category['isDefault'] as bool
-                                          ? () => _deleteCategory(
-                                              category['id'] as String, context)
-                                          : null,
-                                    ),
-                                  )),
-                              // Add button para crear categorías
-                              AddCategoryButton(
-                                onTap: _showCreateCategoryDialog,
-                              ),
-                            ],
-                          ),
-                  ),
-
-                  SizedBox(
-                      height: screenSize.height *
-                          0.1), // Espacio adicional para evitar que el contenido quede bajo la barra de navegación
-                ],
+                                        ),
+                                      ).then((_) {
+                                        // Recargar las categorías al volver
+                                        _loadCategories();
+                                      });
+                                    },
+                                    onDelete: !category['isDefault'] as bool
+                                        ? () => _deleteCategory(
+                                            category['id'] as String, context)
+                                        : null,
+                                  ),
+                                )),
+                            // Add button para crear categorías
+                            AddCategoryButton(
+                              onTap: _showCreateCategoryDialog,
+                            ),
+                            // Espacio adicional para evitar que el contenido quede bajo la barra de navegación
+                            SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                          ],
+                        ),
+                      ),
               ),
 
-              // Bottom navigation bar at fixed position
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: AppBottomNavigation(currentIndex: 0),
-              ),
+              // Bottom navigation bar
+              AppBottomNavigation(currentIndex: 0),
             ],
           ),
         ),

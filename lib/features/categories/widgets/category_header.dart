@@ -91,8 +91,8 @@ class CategoryHeader extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Mantener el color original del icono
-                Icon(categoryIcon, color: categoryColor),
+                // Usar el color original del ícono de categoría
+                Icon(categoryIcon, color: categoryColor), // Mantener el color original
                 const SizedBox(width: AppDimens.paddingS),
                 Expanded(
                   child: Text(

@@ -8,6 +8,7 @@ import 'package:digirecibos/features/settings/screens/privacy_policy_screen.dart
 import 'package:digirecibos/features/settings/screens/help_screen.dart';
 import 'package:digirecibos/features/settings/screens/terms_conditions_screen.dart';
 import 'package:digirecibos/shared/widgets/decorative_background.dart';
+import 'package:digirecibos/shared/widgets/app_header.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({Key? key}) : super(key: key);
@@ -15,59 +16,66 @@ class AboutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Acerca de'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-      ),
       body: DecorativeBackground(
-        child: Padding(
-          padding: const EdgeInsets.all(AppDimens.paddingL),
-          child: Column(
-            children: [
-              // Logo y versión
-              const SizedBox(height: AppDimens.paddingXL),
-              _buildLogoSection(),
-              const SizedBox(height: AppDimens.paddingXXL),
+        child: Column(
+          children: [
+            // Usar el nuevo header unificado
+            AppHeader(
+              title: 'Acerca de',
+              onBackPress: () => Navigator.pop(context),
+            ),
+            
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(AppDimens.paddingL),
+                child: Column(
+                  children: [
+                    // Logo y versión
+                    const SizedBox(height: AppDimens.paddingXL),
+                    _buildLogoSection(),
+                    const SizedBox(height: AppDimens.paddingXXL),
 
-              // Botones de navegación
-              _buildNavigationButton(
-                context: context,
-                icon: Icons.privacy_tip_outlined,
-                label: 'Políticas de privacidad',
-                onTap: () => _navigateToPrivacyPolicy(context),
-              ),
-              const SizedBox(height: AppDimens.paddingL),
-              _buildNavigationButton(
-                context: context,
-                icon: Icons.gavel_outlined,
-                label: 'Términos y condiciones',
-                onTap: () => _navigateToTermsConditions(context),
-              ),
-              const SizedBox(height: AppDimens.paddingL),
-              _buildNavigationButton(
-                context: context,
-                icon: Icons.help_outline,
-                label: 'Ayuda',
-                onTap: () => _navigateToHelp(context),
-              ),
+                    // Botones de navegación
+                    _buildNavigationButton(
+                      context: context,
+                      icon: Icons.privacy_tip_outlined,
+                      label: 'Políticas de privacidad',
+                      onTap: () => _navigateToPrivacyPolicy(context),
+                    ),
+                    const SizedBox(height: AppDimens.paddingL),
+                    _buildNavigationButton(
+                      context: context,
+                      icon: Icons.gavel_outlined,
+                      label: 'Términos y condiciones',
+                      onTap: () => _navigateToTermsConditions(context),
+                    ),
+                    const SizedBox(height: AppDimens.paddingL),
+                    _buildNavigationButton(
+                      context: context,
+                      icon: Icons.help_outline,
+                      label: 'Ayuda',
+                      onTap: () => _navigateToHelp(context),
+                    ),
 
-              const Spacer(),
+                    const Spacer(),
 
-              // Información de contacto
-              const Text(
-                'DigiRecibos © 2025',
-                style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                    // Información de contacto
+                    const Text(
+                      'DigiRecibos © 2025',
+                      style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                    ),
+                    const SizedBox(height: AppDimens.paddingXS),
+                    const Text(
+                      'Desarrollado por Gerardo Herrera y Jair Balan',
+                      style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: AppDimens.paddingL),
+                  ],
+                ),
               ),
-              const SizedBox(height: AppDimens.paddingXS),
-              const Text(
-                'Desarrollado por Gerardo Herrera y Jair Balan',
-                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppDimens.paddingL),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

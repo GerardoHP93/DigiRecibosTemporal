@@ -5,6 +5,7 @@ import 'package:digirecibos/core/constants/app_colors.dart';
 import 'package:digirecibos/core/constants/app_dimens.dart';
 import 'package:digirecibos/core/constants/app_text_styles.dart';
 import 'package:digirecibos/shared/widgets/decorative_background.dart';
+import 'package:digirecibos/shared/widgets/app_header.dart';
 
 class HelpScreen extends StatelessWidget {
   const HelpScreen({Key? key}) : super(key: key);
@@ -12,60 +13,67 @@ class HelpScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Ayuda'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-      ),
       body: DecorativeBackground(
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(AppDimens.paddingL),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Center(
-                    child: Text(
-                      'Soporte y ayuda',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+        child: Column(
+          children: [
+            // Usar el nuevo header unificado
+            AppHeader(
+              title: 'Ayuda',
+              onBackPress: () => Navigator.pop(context),
+            ),
+            
+            Expanded(
+              child: SafeArea(
+                top: false, // Ya está manejado por el AppHeader
+                child: Padding(
+                  padding: const EdgeInsets.all(AppDimens.paddingL),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Center(
+                          child: Text(
+                            'Soporte y ayuda',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: AppDimens.paddingXL),
+                        const Text(
+                          'Para brindar asistencia a nuestros usuarios, DigiRecibos cuenta con los siguientes medios de contacto:',
+                          style: AppTextStyles.body,
+                        ),
+                        const SizedBox(height: AppDimens.paddingL),
+                        _buildHelpSection(
+                          '1. Sección de ayuda',
+                          'La aplicación incluye una sección de ayuda accesible desde: Configuración > Ayuda, donde el usuario encontrará información básica sobre funcionamiento general y permisos requeridos.',
+                          Icons.help_outline,
+                        ),
+                        // Resto de secciones...
+                        _buildHelpSection(
+                          '2. Contacto de soporte',
+                          'Si necesitas soporte adicional o tienes problemas técnicos, puedes comunicarte con nuestro equipo mediante los siguientes medios:\n\n• Correo: al070003@uacam.mx\n• Horario de atención: Lunes a viernes de 9:00 a.m. a 6:00 p.m. (hora del centro de México)',
+                          Icons.email_outlined,
+                        ),
+                        _buildHelpSection(
+                          '3. Reporte de errores',
+                          'Para reportar fallos técnicos, errores en el escaneo o problemas de sincronización, puedes escribirnos directamente indicando el tipo de problema y el modelo de tu dispositivo.',
+                          Icons.bug_report_outlined,
+                        ),
+                        _buildHelpSection(
+                          '4. Sugerencias',
+                          'Las sugerencias o comentarios de mejora pueden enviarse al correo de soporte. Todo aporte será considerado para futuras versiones de DigiRecibos.',
+                          Icons.lightbulb_outline,
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: AppDimens.paddingXL),
-                  const Text(
-                    'Para brindar asistencia a nuestros usuarios, DigiRecibos cuenta con los siguientes medios de contacto:',
-                    style: AppTextStyles.body,
-                  ),
-                  const SizedBox(height: AppDimens.paddingL),
-                  _buildHelpSection(
-                    '1. Sección de ayuda',
-                    'La aplicación incluye una sección de ayuda accesible desde: Configuración > Ayuda, donde el usuario encontrará información básica sobre funcionamiento general y permisos requeridos.',
-                    Icons.help_outline,
-                  ),
-                  _buildHelpSection(
-                    '2. Contacto de soporte',
-                    'Si necesitas soporte adicional o tienes problemas técnicos, puedes comunicarte con nuestro equipo mediante los siguientes medios:\n\n• Correo: al070003@uacam.mx\n• Horario de atención: Lunes a viernes de 9:00 a.m. a 6:00 p.m. (hora del centro de México)',
-                    Icons.email_outlined,
-                  ),
-                  _buildHelpSection(
-                    '3. Reporte de errores',
-                    'Para reportar fallos técnicos, errores en el escaneo o problemas de sincronización, puedes escribirnos directamente indicando el tipo de problema y el modelo de tu dispositivo.',
-                    Icons.bug_report_outlined,
-                  ),
-                  _buildHelpSection(
-                    '4. Sugerencias',
-                    'Las sugerencias o comentarios de mejora pueden enviarse al correo de soporte. Todo aporte será considerado para futuras versiones de DigiRecibos.',
-                    Icons.lightbulb_outline,
-                  ),
-                  const SizedBox(height: AppDimens.paddingXL),
-                  _buildFaqSection(),
-                ],
+                ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -114,6 +122,9 @@ class HelpScreen extends StatelessWidget {
       ),
     );
   }
+
+  // Mantener el resto de los métodos originales...
+  
 
   Widget _buildFaqSection() {
     return Column(

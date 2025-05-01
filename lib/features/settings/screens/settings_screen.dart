@@ -137,67 +137,63 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: DecorativeBackground(
-        child: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: AppDimens.paddingL),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header con imagen de perfil y saludo (ahora usando el componente UserHeader)
+            UserHeader(
+              username: username,
+              isLoading: isLoading,
+            ),
 
-              // Header con imagen de perfil y saludo
-              UserHeader(
-                username: username,
-                isLoading: isLoading,
+            SizedBox(height: AppDimens.paddingXL),
+
+            // Título de la sección
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: AppDimens.paddingL),
+              child: Text(
+                'Ajustes',
+                style: TextStyle(
+                  fontSize: AppDimens.fontXXL,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
+            ),
 
-              SizedBox(height: AppDimens.paddingXL),
+            SizedBox(height: AppDimens.paddingL),
 
-              // Título de la sección
-              Padding(
+            // Botones de configuración
+            Expanded(
+              child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: AppDimens.paddingL),
-                child: Text(
-                  'Ajustes',
-                  style: TextStyle(
-                    fontSize: AppDimens.fontXXL,
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: Column(
+                  children: [
+                    // Botón de Perfil usando SettingsButton
+                    SettingsButton(
+                      text: 'Perfil',
+                      onPressed: _navigateToProfile,
+                    ),
+
+                    SizedBox(height: AppDimens.paddingL),
+
+                    // Botón de Acerca de usando SettingsButton
+                    SettingsButton(
+                      text: 'Acerca de',
+                      onPressed: _navigateToAbout,
+                    ),
+
+                    SizedBox(height: AppDimens.paddingL),
+
+                    // Botón de Cerrar sesión usando SettingsButton
+                    SettingsButton(
+                      text: 'Cerrar sesión',
+                      onPressed: _showLogoutDialog,
+                    ),
+                  ],
                 ),
               ),
-
-              SizedBox(height: AppDimens.paddingL),
-
-              // Botones de configuración
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: AppDimens.paddingL),
-                  child: Column(
-                    children: [
-                      // Botón de Perfil usando SettingsButton
-                      SettingsButton(
-                        text: 'Perfil',
-                        onPressed: _navigateToProfile,
-                      ),
-
-                      SizedBox(height: AppDimens.paddingL),
-
-                      // Botón de Acerca de usando SettingsButton
-                      SettingsButton(
-                        text: 'Acerca de',
-                        onPressed: _navigateToAbout,
-                      ),
-
-                      SizedBox(height: AppDimens.paddingL),
-
-                      // Botón de Cerrar sesión usando SettingsButton
-                      SettingsButton(
-                        text: 'Cerrar sesión',
-                        onPressed: _showLogoutDialog,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
       bottomNavigationBar: AppBottomNavigation(
