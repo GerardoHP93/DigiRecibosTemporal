@@ -32,21 +32,34 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
   final ReceiptRepository _receiptRepository = ReceiptRepository();
   bool _isLoading = false;
   bool _isDeleting = false;
+  bool _isEditing = false;
+  late TextEditingController _descriptionController;
   String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
+    // Inicializar controlador de descripción
+    _descriptionController = TextEditingController(
+      text: widget.receipt.description ?? ''
+    );
+    
     // Establecer orientación para pantalla completa
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
+    
+    debugPrint('ReceiptDetailScreen inicializada con recibo: ${widget.receipt.id}');
+    debugPrint('Descripción: ${widget.receipt.description ?? "No tiene descripción"}');
   }
 
   @override
   void dispose() {
+    // Liberar el controlador
+    _descriptionController.dispose();
+    
     // Restablecer orientación al salir
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -54,7 +67,7 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
     super.dispose();
   }
 
-  // Métodos para acciones del recibo
+// lib/features/categories/screens/receipt_detail_screen.dart (continuación)
   Future<void> _deleteReceipt() async {
     // Mostrar un diálogo de confirmación
     final confirmed = await showDialog<bool>(
@@ -98,7 +111,7 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
         Navigator.pop(context);
       }
     } catch (e) {
-      print('Error al eliminar el recibo: $e');
+      debugPrint('Error al eliminar el recibo: $e');
       setState(() {
         _isDeleting = false;
         _errorMessage = 'Error al eliminar el recibo';
@@ -115,16 +128,75 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
     }
   }
 
+  // Método para actualizar la descripción
+  Future<void> _updateDescription() async {
+    if (!_isEditing) {
+      // Si no estamos editando, activar el modo edición
+      setState(() {
+        _isEditing = true;
+      });
+      return;
+    }
+    
+    // Si estamos editando, guardar los cambios
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      // Crear una copia del recibo con la nueva descripción
+      final updatedReceipt = widget.receipt.copyWith(
+        description: _descriptionController.text.trim().isEmpty 
+            ? null 
+            : _descriptionController.text.trim(),
+      );
+      
+      // Actualizar en la base de datos
+      await _receiptRepository.updateReceipt(updatedReceipt);
+      
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _isEditing = false;
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Descripción actualizada correctamente'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error al actualizar la descripción: $e');
+      
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Error al actualizar la descripción';
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_errorMessage!),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false, // Evita que el contenido se desplace cuando aparece el teclado
+      resizeToAvoidBottomInset: true, // Cambiado a true para manejar aparición del teclado
       appBar: AppBar(
         title: const Text('Detalle del recibo'),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         actions: [
-          if (!_isDeleting)
+          if (!_isDeleting && !_isLoading)
             IconButton(
               icon: const Icon(Icons.delete),
               onPressed: _deleteReceipt,
@@ -241,6 +313,102 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
               overflow: TextOverflow.ellipsis,
             ),
           ),
+          
+          SizedBox(height: verticalSpace),
+          
+          // NUEVO CAMPO: Descripción (editable)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Etiqueta 'Descripción'
+              Text(
+                'Descripción:',
+                style: AppTextStyles.body,
+              ),
+              
+              // Botón de editar/guardar
+              if (!_isLoading)
+                IconButton(
+                  icon: Icon(
+                    _isEditing ? Icons.check : Icons.edit,
+                    color: AppColors.primary,
+                    size: isSmallScreen ? 18 : 22,
+                  ),
+                  onPressed: _updateDescription,
+                  tooltip: _isEditing ? 'Guardar' : 'Editar',
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 30,
+                    minHeight: 30,
+                  ),
+                )
+              else
+                SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.primary,
+                  ),
+                ),
+            ],
+          ),
+          
+          SizedBox(height: verticalSpace / 2),
+          
+          // Campo de descripción (editable o de solo lectura)
+          if (_isEditing)
+            // Campo de texto para editar la descripción
+            TextFormField(
+              controller: _descriptionController,
+              decoration: InputDecoration(
+                hintText: 'Añade una descripción para este recibo',
+                hintStyle: AppTextStyles.bodySmall,
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppDimens.radiusS),
+                  borderSide: const BorderSide(color: AppColors.border),
+                ),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: AppDimens.paddingM,
+                  vertical: AppDimens.paddingS,
+                ),
+              ),
+              maxLines: 3,
+              style: AppTextStyles.bodySmall,
+              enabled: !_isLoading,
+            )
+          else
+            // Mostrar descripción como texto
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(
+                horizontal: AppDimens.paddingM,
+                vertical: AppDimens.paddingS,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(AppDimens.radiusS),
+                border: Border.all(color: Colors.grey[200]!),
+              ),
+              child: Text(
+                widget.receipt.description?.isNotEmpty == true
+                    ? widget.receipt.description!
+                    : 'Sin descripción',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: widget.receipt.description?.isNotEmpty == true
+                      ? AppColors.textPrimary
+                      : Colors.grey,
+                  fontStyle: widget.receipt.description?.isNotEmpty == true
+                      ? FontStyle.normal
+                      : FontStyle.italic,
+                ),
+                maxLines: 5,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
         ],
       ),
     );
@@ -346,7 +514,7 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
       final file = await cacheManager.getSingleFile(url);
       return file.path;
     } catch (e) {
-      print('Error al descargar el PDF: $e');
+      debugPrint('Error al descargar el PDF: $e');
       throw Exception('Error al descargar el PDF: $e');
     }
   }

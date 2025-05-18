@@ -15,6 +15,9 @@ class ReceiptData {
  
   /// Mensaje de error en caso de fallo
   final String? errorMessage;
+  
+  /// Descripción opcional ingresada por el usuario
+  final String? description;
 
   ReceiptData({
     this.amount,
@@ -22,6 +25,7 @@ class ReceiptData {
     required this.rawText,
     required this.success,
     this.errorMessage,
+    this.description,
   });
 
   /// Formatea el monto para mostrar (con dos decimales)
@@ -43,6 +47,7 @@ class ReceiptData {
     String? rawText,
     bool? success,
     String? errorMessage,
+    String? description,
   }) {
     return ReceiptData(
       amount: amount ?? this.amount,
@@ -50,11 +55,12 @@ class ReceiptData {
       rawText: rawText ?? this.rawText,
       success: success ?? this.success,
       errorMessage: errorMessage ?? this.errorMessage,
+      description: description ?? this.description,
     );
   }
 
   @override
   String toString() {
-    return 'ReceiptData(amount: $formattedAmount, date: $formattedDate, success: $success)';
+    return 'ReceiptData(amount: $formattedAmount, date: $formattedDate, success: $success, description: ${description != null ? "Sí" : "No"})';
   }
 }

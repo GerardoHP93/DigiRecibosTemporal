@@ -64,6 +64,7 @@ class ReceiptRepository {
         date: receiptData.date ?? DateTime.now(),
         createdAt: DateTime.now(),
         rawText: receiptData.rawText,
+        description: receiptData.description,
       );
 
       // Guardar en Firestore
@@ -75,8 +76,6 @@ class ReceiptRepository {
       throw Exception('Error al subir el recibo: $error');
     }
   }
-
-  /// Obtener recibos por categoría
 
   /// Obtener recibos por categoría
   Stream<List<Receipt>> getReceiptsByCategory(String categoryId) {
@@ -111,7 +110,7 @@ class ReceiptRepository {
             receiptIds.add(receipt.id);
             receipts.add(receipt);
             debugPrint(
-                'Procesado recibo: ID=${receipt.id}, Fecha=${receipt.formattedDate}, Monto=${receipt.formattedAmount}');
+                'Procesado recibo: ID=${receipt.id}, Fecha=${receipt.formattedDate}, Monto=${receipt.formattedAmount}, Descripción=${receipt.description ?? "N/A"}');
           }
         }
 

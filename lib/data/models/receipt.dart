@@ -32,6 +32,9 @@ class Receipt {
   
   /// Texto completo extraído por OCR (opcional)
   final String? rawText;
+  
+  /// Descripción opcional del recibo
+  final String? description;
 
   Receipt({
     required this.id,
@@ -44,6 +47,7 @@ class Receipt {
     required this.date,
     required this.createdAt,
     this.rawText,
+    this.description,
   });
 
   /// Crear un objeto Receipt desde un documento de Firestore
@@ -60,6 +64,7 @@ class Receipt {
       date: (data['date'] as Timestamp).toDate(),
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       rawText: data['rawText'],
+      description: data['description'],
     );
   }
 
@@ -75,6 +80,7 @@ class Receipt {
       'date': Timestamp.fromDate(date),
       'createdAt': Timestamp.fromDate(createdAt),
       'rawText': rawText,
+      'description': description,
     };
   }
 
@@ -115,6 +121,7 @@ class Receipt {
     DateTime? date,
     DateTime? createdAt,
     String? rawText,
+    String? description,
   }) {
     return Receipt(
       id: id ?? this.id,
@@ -127,6 +134,7 @@ class Receipt {
       date: date ?? this.date,
       createdAt: createdAt ?? this.createdAt,
       rawText: rawText ?? this.rawText,
+      description: description ?? this.description,
     );
   }
 }

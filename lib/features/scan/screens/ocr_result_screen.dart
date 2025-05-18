@@ -28,6 +28,7 @@ class OcrResultScreen extends StatefulWidget {
 class _OcrResultScreenState extends State<OcrResultScreen> {
   late TextEditingController _amountController;
   late TextEditingController _dateController;
+  late TextEditingController _descriptionController;
   DateTime? _selectedDate;
   final _formKey = GlobalKey<FormState>();
   
@@ -51,12 +52,21 @@ class _OcrResultScreenState extends State<OcrResultScreen> {
     } else {
       _dateController = TextEditingController();
     }
+    
+    // Inicializar controlador para la descripción
+    _descriptionController = TextEditingController(
+      text: widget.receiptData.description ?? ''
+    );
+    
+    // Log para depuración
+    debugPrint('OcrResultScreen inicializada con datos: ${widget.receiptData}');
   }
   
   @override
   void dispose() {
     _amountController.dispose();
     _dateController.dispose();
+    _descriptionController.dispose();
     super.dispose();
   }
 
@@ -120,6 +130,7 @@ class _OcrResultScreenState extends State<OcrResultScreen> {
     
     // Obtener valores actualizados
     final double amount = double.parse(_amountController.text);
+    final String description = _descriptionController.text.trim();
     
     // Crear un objeto ReceiptData actualizado
     final updatedReceiptData = ReceiptData(
@@ -127,7 +138,10 @@ class _OcrResultScreenState extends State<OcrResultScreen> {
       date: _selectedDate,
       rawText: widget.receiptData.rawText,
       success: true,
+      description: description.isNotEmpty ? description : null,
     );
+    
+    debugPrint('Continuando a selección de categoría con datos: $updatedReceiptData');
     
     // Navegar a la pantalla de selección de categoría
     Navigator.push(
@@ -143,8 +157,14 @@ class _OcrResultScreenState extends State<OcrResultScreen> {
   
   @override
   Widget build(BuildContext context) {
+    // Obtener el factor de escala de texto para adaptabilidad
+    final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+    final bool isLargeText = textScaleFactor > 1.3;
+    
+    debugPrint('Factor de escala de texto: $textScaleFactor, isLargeText: $isLargeText');
+    
     return Scaffold(
-      resizeToAvoidBottomInset: false, // Evita que el contenido se desplace cuando aparece el teclado
+      resizeToAvoidBottomInset: true, // Cambiado a true para que funcione bien con teclado
       appBar: AppBar(
         title: const Text('Resultados del escaneo'),
         backgroundColor: AppColors.primary,
@@ -156,20 +176,25 @@ class _OcrResultScreenState extends State<OcrResultScreen> {
             padding: const EdgeInsets.all(AppDimens.paddingL),
             child: Form(
               key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _buildInfoCard(),
-                  const SizedBox(height: AppDimens.paddingL),
-                  _buildFormFields(),
-                  const Spacer(),
-                  _buildButtons(),
-                ],
+              // Usar SingleChildScrollView para manejar cuando aparece el teclado
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildInfoCard(),
+                    const SizedBox(height: AppDimens.paddingL),
+                    _buildFormFields(isLargeText),
+                    // Añadimos espacio para no quedar detrás del botón cuando aparece el teclado
+                    SizedBox(height: isLargeText ? 120 : 100),
+                  ],
+                ),
               ),
             ),
           ),
         ),
       ),
+      // Botones fijos en la parte inferior
+      bottomNavigationBar: _buildButtons(),
     );
   }
   
@@ -203,7 +228,12 @@ class _OcrResultScreenState extends State<OcrResultScreen> {
     );
   }
   
-  Widget _buildFormFields() {
+  Widget _buildFormFields(bool isLargeText) {
+    // Ajustar espacio vertical según el tamaño de texto
+    final double verticalSpacing = isLargeText 
+        ? AppDimens.paddingM
+        : AppDimens.paddingL;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -247,7 +277,7 @@ class _OcrResultScreenState extends State<OcrResultScreen> {
           },
         ),
         
-        const SizedBox(height: AppDimens.paddingL),
+        SizedBox(height: verticalSpacing),
         
         // Campo de fecha
         Text('Fecha', style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
@@ -273,46 +303,94 @@ class _OcrResultScreenState extends State<OcrResultScreen> {
           readOnly: true,
           onTap: () => _selectDate(context),
         ),
+        
+        SizedBox(height: verticalSpacing),
+        
+        // NUEVO CAMPO: Descripción
+        Text(
+          'Descripción (opcional)', 
+          style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)
+        ),
+        const SizedBox(height: AppDimens.paddingS),
+        TextFormField(
+          controller: _descriptionController,
+          decoration: InputDecoration(
+            hintText: 'Añade una descripción para este recibo',
+            hintStyle: AppTextStyles.bodySmall,
+            filled: true,
+            fillColor: Colors.white,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppDimens.radiusM),
+              borderSide: const BorderSide(color: AppColors.border),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: AppDimens.paddingL,
+              vertical: AppDimens.paddingM,
+            ),
+          ),
+          // Permitir múltiples líneas para descripciones
+          maxLines: isLargeText ? 2 : 3,
+          // Configurar tipo de teclado para texto normal
+          keyboardType: TextInputType.text,
+          // Configurar apariencia de texto más pequeña
+          style: AppTextStyles.body.copyWith(
+            fontSize: isLargeText ? AppDimens.fontS : AppDimens.fontM,
+          ),
+          // La descripción es opcional, no necesita validación
+        ),
       ],
     );
   }
   
   Widget _buildButtons() {
-    return Row(
-      children: [
-        // Botón Cancelar
-        Expanded(
-          child: ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: AppColors.error,
-              padding: const EdgeInsets.symmetric(vertical: AppDimens.paddingL),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppDimens.radiusM),
-                side: const BorderSide(color: AppColors.error),
-              ),
-            ),
-            child: const Text('Cancelar'),
+    return Container(
+      padding: const EdgeInsets.all(AppDimens.paddingL),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, -2),
           ),
-        ),
-        const SizedBox(width: AppDimens.paddingL),
-        // Botón Continuar
-        Expanded(
-          child: ElevatedButton(
-            onPressed: _continueToSelectCategory,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: AppDimens.paddingL),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppDimens.radiusM),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Botón Cancelar
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: AppColors.error,
+                padding: const EdgeInsets.symmetric(vertical: AppDimens.paddingL),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppDimens.radiusM),
+                  side: const BorderSide(color: AppColors.error),
+                ),
               ),
+              child: const Text('Cancelar'),
             ),
-            child: const Text('Continuar'),
           ),
-        ),
-      ],
+          const SizedBox(width: AppDimens.paddingL),
+          // Botón Continuar
+          Expanded(
+            child: ElevatedButton(
+              onPressed: _continueToSelectCategory,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: AppDimens.paddingL),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppDimens.radiusM),
+                ),
+              ),
+              child: const Text('Continuar'),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
