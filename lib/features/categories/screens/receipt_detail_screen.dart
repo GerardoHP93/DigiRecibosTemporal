@@ -148,22 +148,43 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
   }
 
   Widget _buildContent() {
-    return Column(
-      children: [
-        // Información del recibo
-        _buildReceiptInfo(),
-        
-        // Previsualización del recibo
-        Expanded(
-          child: _buildReceiptPreview(),
-        ),
-      ],
+    // Adaptación para diferentes tamaños de pantalla y texto
+    final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 360 || textScaleFactor > 1.3;
+    
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Información del recibo en formato de columna (modificado)
+          _buildReceiptInfoColumn(isSmallScreen),
+          
+          // Previsualización del recibo
+          Container(
+            height: MediaQuery.of(context).size.height * 0.6, // Ajustar altura para dejar espacio
+            padding: const EdgeInsets.only(bottom: AppDimens.paddingL),
+            child: _buildReceiptPreview(),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildReceiptInfo() {
+  Widget _buildReceiptInfoColumn(bool isSmallScreen) {
+    // Calcular el padding basado en si la pantalla es pequeña
+    final EdgeInsets padding = isSmallScreen 
+        ? const EdgeInsets.all(AppDimens.paddingM)
+        : const EdgeInsets.all(AppDimens.paddingL);
+    
+    // Calcular el espacio vertical entre elementos basado en si la pantalla es pequeña
+    final double verticalSpace = isSmallScreen 
+        ? AppDimens.paddingS
+        : AppDimens.paddingM;
+        
     return Container(
-      padding: const EdgeInsets.all(AppDimens.paddingL),
+      width: double.infinity,
+      padding: padding,
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -177,41 +198,48 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.receipt.formattedAmount,
-                      style: AppTextStyles.title.copyWith(
-                        color: AppColors.primary,
-                        fontSize: 24,
-                      ),
-                    ),
-                    const SizedBox(height: AppDimens.paddingXS),
-                    Text(
-                      widget.receipt.formattedDate,
-                      style: AppTextStyles.body,
-                    ),
-                  ],
-                ),
+          // Monto en una línea completa
+          Text(
+            widget.receipt.formattedAmount,
+            style: AppTextStyles.title.copyWith(
+              color: AppColors.primary,
+              fontSize: 24,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          
+          SizedBox(height: verticalSpace),
+          
+          // Fecha en una línea aparte
+          Text(
+            widget.receipt.formattedDate,
+            style: AppTextStyles.body,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          
+          SizedBox(height: verticalSpace),
+          
+          // Nombre del archivo en un contenedor decorado
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(
+              horizontal: AppDimens.paddingM,
+              vertical: AppDimens.paddingS,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(AppDimens.radiusS),
+            ),
+            child: Text(
+              widget.receipt.fileName,
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.primary,
               ),
-              Container(
-                padding: const EdgeInsets.all(AppDimens.paddingS),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(AppDimens.radiusS),
-                ),
-                child: Text(
-                  widget.receipt.fileName,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.primary,
-                  ),
-                ),
-              ),
-            ],
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       ),
