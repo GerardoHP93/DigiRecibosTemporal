@@ -60,50 +60,57 @@ class ImageCaptureHandler {
   }
 
   /// Procesa el archivo PDF seleccionado
-  Future<void> processPdf(BuildContext context, File pdfFile, List<int> selectedPages) async {
-    try {
-      debugPrint('Iniciando procesamiento de PDF con páginas: $selectedPages');
-      
-      // Mostrar diálogo de carga
-      _showLoadingDialog(context, isPdf: true);
+  // lib/features/scan/services/image_capture_handler.dart
 
-      // Procesar el PDF
-      final receiptData = await _captureProcessor.processPdf(pdfFile, selectedPages);
-      
-      debugPrint('Procesamiento de PDF completado: ${receiptData.success}');
+// Modificar processPdf para manejar correctamente el estado al volver atrás
+Future<void> processPdf(BuildContext context, File pdfFile, List<int> selectedPages) async {
+  try {
+    debugPrint('Iniciando procesamiento de PDF con páginas: $selectedPages');
+    
+    // Mostrar diálogo de carga
+    _showLoadingDialog(context, isPdf: true);
 
-      // Cerrar diálogo de carga
-      if (context.mounted) {
-        Navigator.of(context).pop(); // Cerrar el diálogo de carga
-      }
+    // Procesar el PDF
+    final receiptData = await _captureProcessor.processPdf(pdfFile, selectedPages);
+    
+    debugPrint('Procesamiento de PDF completado: ${receiptData.success}');
 
-      // Navegar a la pantalla de resultados OCR
-      if (context.mounted) {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => OcrResultScreen(
-              receiptData: receiptData,
-              filePath: pdfFile.path,
-            ),
+    // Cerrar diálogo de carga
+    if (context.mounted) {
+      Navigator.of(context).pop(); // Cerrar el diálogo de carga
+    }
+
+    // Navegar a la pantalla de resultados OCR
+    if (context.mounted) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => OcrResultScreen(
+            receiptData: receiptData,
+            filePath: pdfFile.path,
           ),
-        );
-      }
-    } catch (e) {
-      debugPrint('Error en processPdf: $e');
-      // Cerrar diálogo de carga si hay error
-      if (context.mounted) {
-        Navigator.of(context).pop(); // Cerrar el diálogo de carga
+        ),
+      ).then((_) {
+        // Cuando se regresa de la pantalla de resultados OCR
+        debugPrint('Regresando de OcrResultScreen a la vista previa del PDF');
+        // No necesitamos hacer nada más aquí, ya que el manejo se hace en PdfPreviewScreen
+      });
+    }
+  } catch (e) {
+    debugPrint('Error en processPdf: $e');
+    // Cerrar diálogo de carga si hay error
+    if (context.mounted) {
+      Navigator.of(context).pop(); // Cerrar el diálogo de carga
 
-        // Mostrar mensaje de error
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error al procesar el PDF: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      // Mostrar mensaje de error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al procesar el PDF: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
+}
 
   /// Muestra diálogo de carga durante el procesamiento
   void _showLoadingDialog(BuildContext context, {bool isPdf = false}) {

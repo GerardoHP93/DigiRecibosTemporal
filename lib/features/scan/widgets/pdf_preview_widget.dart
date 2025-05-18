@@ -22,7 +22,7 @@ class PdfPreviewWidget extends StatefulWidget {
   State<PdfPreviewWidget> createState() => _PdfPreviewWidgetState();
 }
 
-class _PdfPreviewWidgetState extends State<PdfPreviewWidget> {
+class _PdfPreviewWidgetState extends State<PdfPreviewWidget> with AutomaticKeepAliveClientMixin {
   PdfDocument? _document;
   int _pageCount = 0;
   int _currentPage = 0;
@@ -31,17 +31,39 @@ class _PdfPreviewWidgetState extends State<PdfPreviewWidget> {
   final Set<int> _selectedPages = {};
   final PageController _pageController = PageController();
 
+  // Override del getter keepAlive para AutomaticKeepAliveClientMixin
+  @override
+  bool get wantKeepAlive => true;
+
   @override
   void initState() {
     super.initState();
     _loadPdf();
+    debugPrint('PdfPreviewWidget initState - cargando PDF');
   }
 
   @override
   void dispose() {
     _document?.dispose();
     _pageController.dispose();
+    debugPrint('PdfPreviewWidget dispose - limpiando recursos');
     super.dispose();
+  }
+
+  // Método importante: se llama cuando el widget se reconstruye
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Si estamos en estado de procesamiento, volver a estado normal
+    // Esto sucederá cuando regresemos desde otra pantalla
+    Future.microtask(() {
+      if (_isProcessing && mounted) {
+        debugPrint('didChangeDependencies - restableciendo _isProcessing desde true a false');
+        setState(() {
+          _isProcessing = false;
+        });
+      }
+    });
   }
 
   Future<void> _loadPdf() async {
@@ -51,22 +73,27 @@ class _PdfPreviewWidgetState extends State<PdfPreviewWidget> {
       });
 
       final document = await PdfDocument.openFile(widget.pdfFile.path);
-      setState(() {
-        _document = document;
-        _pageCount = document.pageCount;
-        _isLoading = false;
-
-        // Si solo hay una página, seleccionarla automáticamente
-        if (_pageCount == 1) {
-          _selectedPages.add(0);
-        }
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      print('Error al cargar el PDF: $e');
+      
       if (mounted) {
+        setState(() {
+          _document = document;
+          _pageCount = document.pageCount;
+          _isLoading = false;
+          _isProcessing = false; // Asegurar que siempre comience en false
+
+          // Si solo hay una página, seleccionarla automáticamente
+          if (_pageCount == 1) {
+            _selectedPages.add(0);
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _isProcessing = false; // Asegurar que siempre comience en false
+        });
+        debugPrint('Error al cargar el PDF: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error al cargar el PDF: $e'),
@@ -78,6 +105,8 @@ class _PdfPreviewWidgetState extends State<PdfPreviewWidget> {
   }
 
   void _togglePageSelection(int pageIndex) {
+    if (_isProcessing) return; // No permitir interacción durante el procesamiento
+    
     setState(() {
       if (_selectedPages.contains(pageIndex)) {
         _selectedPages.remove(pageIndex);
@@ -88,6 +117,8 @@ class _PdfPreviewWidgetState extends State<PdfPreviewWidget> {
   }
 
   void _selectAllPages() {
+    if (_isProcessing) return; // No permitir interacción durante el procesamiento
+    
     setState(() {
       _selectedPages.clear();
       for (int i = 0; i < _pageCount; i++) {
@@ -97,6 +128,8 @@ class _PdfPreviewWidgetState extends State<PdfPreviewWidget> {
   }
 
   void _clearSelection() {
+    if (_isProcessing) return; // No permitir interacción durante el procesamiento
+    
     setState(() {
       _selectedPages.clear();
     });
@@ -104,6 +137,19 @@ class _PdfPreviewWidgetState extends State<PdfPreviewWidget> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Necesario para AutomaticKeepAliveClientMixin
+    
+    // Comprobación adicional para resetear el estado de procesamiento
+    // cuando el widget se reconstruye (esto sucederá al volver a la pantalla)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_isProcessing && mounted && ModalRoute.of(context)?.isCurrent == true) {
+        debugPrint('PostFrameCallback detectó que estamos en pantalla activa y _isProcessing=true, reiniciando a false');
+        setState(() {
+          _isProcessing = false;
+        });
+      }
+    });
+
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(color: Color(0xFF1E555C)),
@@ -163,9 +209,6 @@ class _PdfPreviewWidgetState extends State<PdfPreviewWidget> {
                       style: TextStyle(color: Colors.white),
                     ),
                     const SizedBox(height: 8),
-                    // lib/features/scan/widgets/pdf_preview_widget.dart (ajustes para responsividad)
-
-// Reemplaza el Row que tiene el problema (alrededor de la línea 166) con esto:
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -177,34 +220,27 @@ class _PdfPreviewWidgetState extends State<PdfPreviewWidget> {
                           ),
                         ),
                         Row(
-                          mainAxisSize: MainAxisSize
-                              .min, // Importante para que no ocupe todo el espacio
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             TextButton(
-                              onPressed: _selectAllPages,
+                              onPressed: _isProcessing ? null : _selectAllPages,
                               style: TextButton.styleFrom(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8),
-                                minimumSize:
-                                    Size.zero, // Elimina el tamaño mínimo
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                minimumSize: Size.zero,
+                                foregroundColor: Colors.white,
+                                disabledForegroundColor: Colors.white.withOpacity(0.5),
                               ),
-                              child: const Text(
-                                'Todas',
-                                style: TextStyle(color: Colors.white),
-                              ),
+                              child: const Text('Todas'),
                             ),
                             TextButton(
-                              onPressed: _clearSelection,
+                              onPressed: _isProcessing ? null : _clearSelection,
                               style: TextButton.styleFrom(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8),
-                                minimumSize:
-                                    Size.zero, // Elimina el tamaño mínimo
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                minimumSize: Size.zero,
+                                foregroundColor: Colors.white,
+                                disabledForegroundColor: Colors.white.withOpacity(0.5),
                               ),
-                              child: const Text(
-                                'Borrar',
-                                style: TextStyle(color: Colors.white),
-                              ),
+                              child: const Text('Borrar'),
                             ),
                           ],
                         ),
@@ -219,6 +255,7 @@ class _PdfPreviewWidgetState extends State<PdfPreviewWidget> {
             Expanded(
               child: PageView.builder(
                 controller: _pageController,
+                physics: _isProcessing ? const NeverScrollableScrollPhysics() : null,
                 itemCount: _pageCount,
                 onPageChanged: (int page) {
                   setState(() {
@@ -227,7 +264,7 @@ class _PdfPreviewWidgetState extends State<PdfPreviewWidget> {
                 },
                 itemBuilder: (context, index) {
                   return GestureDetector(
-                    onTap: () => _togglePageSelection(index),
+                    onTap: _isProcessing ? null : () => _togglePageSelection(index),
                     child: Stack(
                       fit: StackFit.expand,
                       children: [
@@ -286,7 +323,7 @@ class _PdfPreviewWidgetState extends State<PdfPreviewWidget> {
         ),
 
         // Controles de navegación para PDFs multipágina
-        if (_pageCount > 1)
+        if (_pageCount > 1 && !_isProcessing)
           Positioned.fill(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -358,11 +395,17 @@ class _PdfPreviewWidgetState extends State<PdfPreviewWidget> {
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: widget.onCancel,
+                    onPressed: _isProcessing 
+                      ? null 
+                      : () {
+                          debugPrint('Botón Cancelar presionado');
+                          widget.onCancel();
+                        },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 12),
+                      disabledBackgroundColor: Colors.grey,
                     ),
                     child: const Text('Cancelar'),
                   ),
@@ -373,9 +416,12 @@ class _PdfPreviewWidgetState extends State<PdfPreviewWidget> {
                     onPressed: _isProcessing || _selectedPages.isEmpty
                         ? null
                         : () {
+                            debugPrint('Botón Continuar presionado - activando _isProcessing');
                             setState(() {
                               _isProcessing = true;
                             });
+                            
+                            // IMPORTANTE: Procesamos las páginas seleccionadas
                             widget.onPagesSelected(
                               widget.pdfFile,
                               _selectedPages.toList(),

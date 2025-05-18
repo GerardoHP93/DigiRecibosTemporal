@@ -123,37 +123,44 @@ class _OcrResultScreenState extends State<OcrResultScreen> {
     return true;
   }
 
-  void _continueToSelectCategory() {
-    if (!_validateForm()) {
-      return;
-    }
-    
-    // Obtener valores actualizados
-    final double amount = double.parse(_amountController.text);
-    final String description = _descriptionController.text.trim();
-    
-    // Crear un objeto ReceiptData actualizado
-    final updatedReceiptData = ReceiptData(
-      amount: amount,
-      date: _selectedDate,
-      rawText: widget.receiptData.rawText,
-      success: true,
-      description: description.isNotEmpty ? description : null,
-    );
-    
-    debugPrint('Continuando a selección de categoría con datos: $updatedReceiptData');
-    
-    // Navegar a la pantalla de selección de categoría
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CategorySelectionScreen(
-          receiptData: updatedReceiptData,
-          filePath: widget.filePath,
-        ),
-      ),
-    );
+void _continueToSelectCategory() {
+  if (!_validateForm()) {
+    return;
   }
+  
+  // Obtener valores actualizados
+  final double amount = double.parse(_amountController.text);
+  final String description = _descriptionController.text.trim();
+  
+  // Crear un objeto ReceiptData actualizado
+  final updatedReceiptData = ReceiptData(
+    amount: amount,
+    date: _selectedDate,
+    rawText: widget.receiptData.rawText,
+    success: true,
+    description: description.isNotEmpty ? description : null,
+  );
+  
+  debugPrint('Continuando a selección de categoría con datos: $updatedReceiptData');
+  
+  // Navegar a la pantalla de selección de categoría
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => CategorySelectionScreen(
+        receiptData: updatedReceiptData,
+        filePath: widget.filePath,
+      ),
+    ),
+  );
+}
+
+// Agregar un método para regresar a la pantalla anterior
+void _goBack() {
+  debugPrint('Regresando a la pantalla de vista previa del PDF desde OcrResultScreen');
+  // Aquí simplemente usamos Navigator.pop, que volverá a la pantalla anterior
+  Navigator.pop(context);
+}
   
   @override
   Widget build(BuildContext context) {
@@ -342,55 +349,58 @@ class _OcrResultScreenState extends State<OcrResultScreen> {
     );
   }
   
-  Widget _buildButtons() {
-    return Container(
-      padding: const EdgeInsets.all(AppDimens.paddingL),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Botón Cancelar
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: AppColors.error,
-                padding: const EdgeInsets.symmetric(vertical: AppDimens.paddingL),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppDimens.radiusM),
-                  side: const BorderSide(color: AppColors.error),
-                ),
+
+// Y modificar _buildButtons para usar este método
+Widget _buildButtons() {
+  return Container(
+    padding: const EdgeInsets.all(AppDimens.paddingL),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.1),
+          blurRadius: 4,
+          offset: const Offset(0, -2),
+        ),
+      ],
+    ),
+    child: Row(
+      children: [
+        // Botón Cancelar
+        Expanded(
+          child: ElevatedButton(
+            onPressed: _goBack, // Usamos el nuevo método
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: AppColors.error,
+              padding: const EdgeInsets.symmetric(vertical: AppDimens.paddingL),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppDimens.radiusM),
+                side: const BorderSide(color: AppColors.error),
               ),
-              child: const Text('Cancelar'),
             ),
+            child: const Text('Cancelar'),
           ),
-          const SizedBox(width: AppDimens.paddingL),
-          // Botón Continuar
-          Expanded(
-            child: ElevatedButton(
-              onPressed: _continueToSelectCategory,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: AppDimens.paddingL),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppDimens.radiusM),
-                ),
+        ),
+        const SizedBox(width: AppDimens.paddingL),
+
+        // Botón Continuar
+        Expanded(
+          child: ElevatedButton(
+            onPressed: _continueToSelectCategory,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: AppDimens.paddingL),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppDimens.radiusM),
               ),
-              child: const Text('Continuar'),
             ),
+            child: const Text('Continuar'),
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
 }
