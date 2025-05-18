@@ -139,25 +139,41 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
   }
 
 /// Muestra diálogo de confirmación para recibos duplicados
-/// Muestra diálogo de confirmación para recibos duplicados
 Future<bool?> _showDuplicateWarning() async {
+  // Obtener el tamaño de la pantalla y el factor de escala de texto para adaptación
+  final screenSize = MediaQuery.of(context).size;
+  final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+  final bool isSmallScreen = screenSize.width < 360 || textScaleFactor > 1.3;
+  
+  debugPrint('DuplicateWarning: textScaleFactor=$textScaleFactor, screenWidth=${screenSize.width}, isSmallScreen=$isSmallScreen');
+  
   return await showDialog<bool?>(
     context: context,
-    barrierDismissible: true, // Permitir cerrar al hacer clic fuera del diálogo
+    barrierDismissible: true,
     builder: (BuildContext dialogContext) {
       return Dialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppDimens.radiusL),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(0), // Sin padding para controlar mejor el espacio
+        // Usar tamaño variable según el tamaño de pantalla
+        insetPadding: EdgeInsets.symmetric(
+          horizontal: screenSize.width * 0.05,
+          vertical: screenSize.height * 0.1,
+        ),
+        child: Container(
+          // Asegurar ancho y alto máximos
+          width: screenSize.width * 0.9,
+          constraints: BoxConstraints(
+            maxWidth: screenSize.width * 0.9,
+            maxHeight: screenSize.height * 0.7,
+          ),
           child: Column(
-            mainAxisSize: MainAxisSize.min, // Para que el diálogo sea compacto
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Encabezado con título y botón de cierre
               Container(
-                padding: const EdgeInsets.fromLTRB(24, 16, 8, 16),
+                padding: const EdgeInsets.fromLTRB(16, 16, 8, 16),
                 decoration: BoxDecoration(
                   color: AppColors.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.only(
@@ -167,29 +183,37 @@ Future<bool?> _showDuplicateWarning() async {
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
                       child: Text(
                         'Posible recibo duplicado',
                         style: TextStyle(
-                          fontSize: AppDimens.fontL,
+                          fontSize: isSmallScreen ? 
+                              AppDimens.fontM : AppDimens.fontL,
                           fontWeight: FontWeight.bold,
                           color: AppColors.primary,
                         ),
+                        // Permitir que el texto se ajuste en múltiples líneas si es necesario
+                        softWrap: true,
+                        overflow: TextOverflow.visible,
                       ),
                     ),
-                    // Botón de cierre separado con buen espaciado
+                    // Botón de cierre
                     IconButton(
                       icon: Icon(
                         Icons.close,
                         color: Colors.grey[600],
+                        size: 20, // Reducir tamaño
                       ),
                       onPressed: () {
-                        Navigator.pop(dialogContext); // Solo cierra el diálogo
+                        Navigator.pop(dialogContext);
                       },
                       padding: EdgeInsets.zero,
-                      constraints: BoxConstraints(), // Permite tamaño personalizado
-                      iconSize: 24,
+                      constraints: const BoxConstraints(
+                        minWidth: 20,
+                        minHeight: 20,
+                      ),
                       splashRadius: 20,
                     ),
                   ],
@@ -198,39 +222,67 @@ Future<bool?> _showDuplicateWarning() async {
               
               // Contenido del diálogo
               Padding(
-                padding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
                 child: Text(
                   'Se ha detectado que existe un recibo en la categoría con el mismo monto y fecha. '
                   'Asegúrate de no estar subiendo el mismo recibo.',
-                  style: TextStyle(fontSize: AppDimens.fontM),
+                  style: TextStyle(
+                    fontSize: isSmallScreen ? 
+                        AppDimens.fontS : AppDimens.fontM,
+                  ),
+                  // Permitir que el texto se ajuste automáticamente
+                  softWrap: true,
                 ),
               ),
               
-              // Botones de acción
+              // Botones de acción - Siempre en columna para evitar desbordamientos
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(dialogContext, false); // Verificar
-                      },
-                      child: Text(
-                        'Verificar',
-                        style: TextStyle(color: AppColors.textSecondary),
+                    // Botón Verificar
+                    SizedBox(
+                      width: double.infinity,
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.pop(dialogContext, false);
+                        },
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        ),
+                        child: Text(
+                          'Verificar',
+                          style: TextStyle(color: AppColors.textSecondary),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(dialogContext, true); // Guardar de todas formas
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
+                    const SizedBox(height: 8),
+                    // Botón Guardar de todas formas
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(dialogContext, true);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        ),
+                        child: Text(
+                          'Guardar de todas formas',
+                          // Permitir que el texto se ajuste y tenga varias líneas
+                          textAlign: TextAlign.center,
+                          softWrap: true,
+                          overflow: TextOverflow.visible,
+                          style: TextStyle(
+                            fontSize: isSmallScreen ? 
+                                AppDimens.fontS : AppDimens.fontM,
+                          ),
+                        ),
                       ),
-                      child: const Text('Guardar de todas formas'),
                     ),
                   ],
                 ),

@@ -1,3 +1,5 @@
+// lib/features/auth/screens/register_screen.dart - Versión corregida
+
 import 'package:flutter/material.dart';
 import 'package:digirecibos/services/auth_service.dart';
 import 'package:digirecibos/features/auth/screens/email_verification_screen.dart';
@@ -23,9 +25,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
       TextEditingController();
   final AuthService authService = AuthService();
   bool _isLoading = false;
-  bool _termsAccepted = false; // Nueva variable para términos y condiciones
+  bool _termsAccepted = false;
 
-  // Validación de formulario
+  // Métodos de validación... (sin cambios)
   String? _validateUsername(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'El nombre de usuario es obligatorio';
@@ -37,7 +39,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (value == null || value.trim().isEmpty) {
       return 'El correo electrónico es obligatorio';
     }
-    // Validación básica de formato de email
     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
       return 'Ingresa un correo electrónico válido';
     }
@@ -48,16 +49,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (value == null || value.trim().isEmpty) {
       return 'La contraseña es obligatoria';
     }
-    // Expresión regular que valida:
-    // - Mínimo 8 caracteres
-    // - Al menos una mayúscula
-    // - Al menos una minúscula
-    // - Al menos un número
     final passwordRegex = RegExp(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$');
     if (!passwordRegex.hasMatch(value)) {
       return 'La contraseña debe tener mínimo 8 caracteres, mayúsculas, minúsculas y números';
     }
-    return null; // La contraseña es válida
+    return null;
   }
 
   String? _validateConfirmPassword(String? value) {
@@ -70,10 +66,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return null;
   }
 
-  // Validar todos los campos antes de enviar
   bool _validateForm() {
     bool isValid = true;
-    // Validar todos los campos
     final usernameError = _validateUsername(usernameController.text);
     final emailError = _validateEmail(emailController.text);
     final passwordError = _validatePassword(passwordController.text);
@@ -84,7 +78,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
         emailError != null ||
         passwordError != null ||
         confirmPasswordError != null) {
-      // Mostrar el primer error encontrado
       String errorMessage = usernameError ??
           emailError ??
           passwordError ??
@@ -100,7 +93,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       isValid = false;
     }
 
-    // Verificar si se aceptaron los términos y condiciones
     if (!_termsAccepted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -116,7 +108,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void register() async {
-    // Validar el formulario antes de proceder
     if (!_validateForm()) {
       return;
     }
@@ -136,7 +127,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     if (result['success']) {
-      // Redirigir a la pantalla de verificación de correo
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -155,7 +145,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-  // Mostrar diálogo de términos y condiciones
   void _showTermsAndConditions() {
     showDialog(
       context: context,
@@ -200,97 +189,116 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Obtener factor de escala de texto para adaptar espaciados
+    final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+    
+    // Calcular espaciado adaptativo
+    final double verticalSpacing = textScaleFactor > 1.3 
+        ? AppDimens.paddingS 
+        : AppDimens.paddingL;
+    
+    debugPrint('RegisterScreen: textScaleFactor=$textScaleFactor, verticalSpacing=$verticalSpacing');
+    
     return AuthBackground(
       backgroundColor: AppColors.primaryLight,
       child: SafeArea(
         child: AuthCard(
-          minHeight: 600, // Ajustado para hacer espacio para los términos
-          maxHeight: 720, // Ajustado para hacer espacio para los términos
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Título
-              const AuthTitle(title: "CREAR UNA CUENTA"),
-              const SizedBox(height: AppDimens.paddingXL),
+          minHeight: 400, // Altura mínima original
+          maxHeight: 600, // Altura máxima original
+          child: SingleChildScrollView(
+            // Usamos SingleChildScrollView en lugar de ListView
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Título
+                const AuthTitle(title: "CREAR UNA CUENTA"),
+                SizedBox(height: verticalSpacing),
 
-              // Campo de correo
-              AuthTextField(
-                controller: emailController,
-                labelText: "Ingresa tu correo",
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: AppDimens.paddingL),
+                // Campo de correo
+                AuthTextField(
+                  controller: emailController,
+                  labelText: "Ingresa tu correo",
+                  keyboardType: TextInputType.emailAddress,
+                ),
+                SizedBox(height: verticalSpacing),
 
-              // Campo de nombre de usuario
-              AuthTextField(
-                controller: usernameController,
-                labelText: "Ingresa tu nombre",
-              ),
-              const SizedBox(height: AppDimens.paddingL),
+                // Campo de nombre de usuario
+                AuthTextField(
+                  controller: usernameController,
+                  labelText: "Ingresa tu nombre",
+                ),
+                SizedBox(height: verticalSpacing),
 
-              // Campo de contraseña
-              PasswordField(
-                controller: passwordController,
-                labelText: "Ingresa una contraseña",
-                helperText: "Mínimo 8 caracteres, con mayúsculas y números",
-              ),
-              const SizedBox(height: AppDimens.paddingL),
+                // Campo de contraseña
+                PasswordField(
+                  controller: passwordController,
+                  labelText: "Ingresa una contraseña",
+                  helperText: textScaleFactor > 1.3 
+                      ? null 
+                      : "Mínimo 8 caracteres, con mayúsculas y números",
+                ),
+                SizedBox(height: verticalSpacing),
 
-              // Campo de confirmar contraseña
-              PasswordField(
-                controller: confirmPasswordController,
-                labelText: "Confirma tu contraseña",
-              ),
-              const SizedBox(height: AppDimens.paddingL),
+                // Campo de confirmar contraseña
+                PasswordField(
+                  controller: confirmPasswordController,
+                  labelText: "Confirma tu contraseña",
+                ),
+                SizedBox(height: verticalSpacing),
 
-              // Términos y condiciones
-              Row(
-                children: [
-                  Checkbox(
-                    value: _termsAccepted,
-                    onChanged: (bool? value) {
-                      setState(() {
-                        _termsAccepted = value ?? false;
-                      });
-                    },
-                    activeColor: AppColors.primary,
-                  ),
-                  Expanded(
-                    child: GestureDetector(
+                // Términos y condiciones
+                Wrap(
+                  alignment: WrapAlignment.start,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Checkbox(
+                      value: _termsAccepted,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          _termsAccepted = value ?? false;
+                        });
+                      },
+                      activeColor: AppColors.primary,
+                    ),
+                    GestureDetector(
                       onTap: _showTermsAndConditions,
                       child: Text(
                         'Acepto los términos y condiciones',
                         style: TextStyle(
                           color: AppColors.textPrimary,
                           decoration: TextDecoration.underline,
+                          fontSize: textScaleFactor > 1.3 
+                              ? AppDimens.fontS 
+                              : AppDimens.fontM,
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppDimens.paddingL),
+                  ],
+                ),
+                SizedBox(height: verticalSpacing),
 
-              // Botón de crear cuenta
-              AuthButton(
-                text: "Crear cuenta",
-                isLoading: _isLoading,
-                onPressed: _termsAccepted
-                    ? register
-                    : null, // Se desactiva si no se aceptan los términos
-              ),
-              const SizedBox(height: AppDimens.paddingL),
+                // Botón de crear cuenta
+                AuthButton(
+                  text: "Crear cuenta",
+                  isLoading: _isLoading,
+                  onPressed: _termsAccepted ? register : null,
+                ),
+                SizedBox(height: verticalSpacing),
 
-              // Botón de ya tengo una cuenta
-              AuthButton(
-                text: "Ya tengo una cuenta",
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                type: AuthButtonType.secondary,
-              ),
-            ],
+                // Botón de ya tengo una cuenta
+                AuthButton(
+                  text: "Ya tengo una cuenta",
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  type: AuthButtonType.secondary,
+                ),
+                
+                // Espacio adicional para scroll cuando hay texto grande
+                SizedBox(height: textScaleFactor > 1.3 ? 50.0 : 20.0),
+              ],
+            ),
           ),
         ),
       ),

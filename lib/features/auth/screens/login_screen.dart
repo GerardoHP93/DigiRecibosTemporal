@@ -111,8 +111,8 @@ class _LoginScreenState extends State<LoginScreen> {
     return AuthBackground(
       child: SafeArea(
         child: AuthCard(
-          minHeight: 550,
-          maxHeight: 600,
+          minHeight: 500,
+          maxHeight: 570,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
