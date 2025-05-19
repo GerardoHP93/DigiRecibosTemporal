@@ -51,7 +51,8 @@ dependencies:
   #dependencias para el ocr
   google_mlkit_text_recognition: ^0.15.0
   pdf_render: ^1.4.12
-
+  # Nueva dependencia para compartir archivos
+  share_plus: ^7.2.1
 
   image: ^4.5.4
   path_provider: ^2.1.5

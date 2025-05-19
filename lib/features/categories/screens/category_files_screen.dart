@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async'; // Importante para manejar StreamSubscription
+import 'package:digirecibos/features/export/widgets/export_report_button.dart';
+
 
 // Importar componentes reutilizables
 import 'package:digirecibos/shared/widgets/decorative_background.dart';
@@ -314,11 +316,24 @@ class _CategoryFilesScreenState extends State<CategoryFilesScreen> {
               ),
               
               // "Ver gráficas de costos" button
-              ViewChartsButton(
-                categoryId: _categoryId ?? '',
-                categoryName: widget.category,
-                categoryColor: widget.categoryColor,
-                categoryIcon: widget.categoryIcon,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Botón para exportar el reporte
+                  ExportReportButton(
+                    categoryId: _categoryId ?? '',
+                    categoryName: widget.category,
+                    receipts: _receipts,
+                  ),
+                  
+                  // Botón para ver gráficas de costos
+                  ViewChartsButton(
+                    categoryId: _categoryId ?? '',
+                    categoryName: widget.category,
+                    categoryColor: widget.categoryColor,
+                    categoryIcon: widget.categoryIcon,
+                  ),
+                ],
               ),
               
               // Bottom navigation bar with consistent navigation

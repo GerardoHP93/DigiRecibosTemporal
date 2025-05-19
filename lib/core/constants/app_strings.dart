@@ -40,4 +40,10 @@ class AppStrings {
   static const String selectPDF = 'Seleccionar archivo pdf';
   static const String defaultUsername = 'Usuario';
   static const String greeting = '¡Hola';
+
+  // texto de exportación
+  static const String exportReport = 'Exportar\nreporte';
+  static const String noReceiptsToExport = 'No hay recibos para exportar';
+  static const String exportSuccess = 'Reporte generado correctamente';
+  static const String exportError = 'Error al exportar reporte';
 }
